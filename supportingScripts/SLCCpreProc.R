@@ -2,7 +2,7 @@
 ## DBM, 12/14/17
 
 
-###### SET UP THE PACKAGES ####
+###### SET UP THE NECESSARY PACKAGES ####
 rm(list = ls())
 ## Get the necessary packages for the analyses
 get.package<- function(package){
