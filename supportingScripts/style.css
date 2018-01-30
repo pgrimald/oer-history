@@ -1,0 +1,35 @@
+/* Changes all fonts to avenir*/
+
+body {
+	font-family: Avenir;
+	font-size: 12pt;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	font-family: Avenir;
+}
+
+p {
+	font-family: Avenir;
+}
+/*
+#background {
+    position:absolute;
+    z-index:0;
+    background:white;
+    display:block;
+    min-height:50%; 
+    min-width:50%;
+}
+
+#content{
+    position:absolute;
+    z-index:2;
+}
+
+#bg-text {
+    color:lightgrey;
+    font-size:120px;
+    transform:rotate(300deg);
+    -webkit-transform:rotate(300deg);
+} */

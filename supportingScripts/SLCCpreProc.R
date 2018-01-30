@@ -2,7 +2,7 @@
 ## DBM, 12/14/17
 
 
-###### SET UP THE NECESSARY PACKAGES ####
+# Setup the necessary packages --------------------------------------------
 rm(list = ls())
 ## Get the necessary packages for the analyses
 get.package<- function(package){
@@ -13,8 +13,8 @@ get.package<- function(package){
 }
 
 ## packages required
-packages.needed <- c('dplyr', 'rapportools','readr', 'readxl', 'ggplot2', 'tidyr', 'broom', 'captioner','knitr','extrafont', 'lubridate', 'lettercase') 
-invisible(sapply(packages.needed, get.package))
+packages.needed <- c('dplyr', 'rapportools','readr', 'prophet','sjPlot', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'ggplot2', 'tidyr', 'broom', 'captioner','knitr','extrafont', 'lubridate', 'lettercase') 
+suppressMessages(sapply(packages.needed, get.package))
 
 ## source ggplot template
 source('~/Documents/git/research/gates/ggplot2theme_min.R')
@@ -23,7 +23,7 @@ source('~/Documents/git/research/gates/ggplot2theme_min.R')
 ## Read in SLCC data
 SLCCpersistence <- read_csv('~/Box Sync/SLCC History/oer_data.csv')
 
-######## Preprocess dataset for modeling
+# Preprocess dataset for modeling------------------------------------------------------
 ### Convert date fields to standardized format
 ### Compute Age
 ### Mark academic year
@@ -36,24 +36,42 @@ SLCCpersistence <- read_csv('~/Box Sync/SLCC History/oer_data.csv')
 SLCCpersistenceProc <- SLCCpersistence %>% 
   mutate(studentId = factor(id), 
          instructorId = factor(INSTRUCTOR_PIDM),
-         birthDate = dmy(SLCCpersistence$BIRTH_DATE),
-         termStartDate = dmy(SLCCpersistence$TERM_START_DATE),
-         termEndDate = dmy(SLCCpersistence$TERM_END_DATE)) %>% 
+         birthDate = dmy(BIRTH_DATE),
+         termStartDate = dmy(TERM_START_DATE),
+         termEndDate = dmy(TERM_END_DATE)) %>% 
   mutate(roundedGrade = gsub("\\+|\\-","", FINAL_GRADE),
          age = as.numeric(round(difftime(termStartDate, birthDate, units = "weeks")/52)),
          year = year(termStartDate), 
          semester = if_else(month(termStartDate) == 8, "Fall",
-                           ifelse(month(termStartDate) == 5, "Summer", "Spring"))) %>% 
-  unite(yrSem, year, semester, sep = " ") %>% 
-  mutate(oer = if_else(termStartDate >= "2014-05-19" & COURSE_SUBJECT == "HIST", 1, 0),
-         pass = if_else(roundedGrade >= "C",1,0),
-         academicYear = if_else(yrSem %in% c("2011 Fall", "2012 Spring", "2012 Summer"), "2011-2012",
-                                if_else(yrSem %in% c("2012 Fall", "2013 Spring", "2013 Summer"), "2012-2013",
-                                        if_else(yrSem %in% c("2013 Fall", "2014 Spring", "2014 Summer"), "2013-2014",
-                                                if_else(yrSem %in% c("2014 Fall", "2015 Spring", "2015 Summer"), "2014-2015",
-                                                        if_else(yrSem %in% c("2015 Fall", "2016 Spring", "2016 Summer"), "2015-2016",
-                                                                if_else(yrSem %in% c("2016 Fall", "2017 Spring", "2017 Summer"), "2016-2017", "Check"))))))) %>% 
-  select(-TERM_START_DATE,-TERM_END_DATE,-BIRTH_DATE)
+                           if_else(month(termStartDate) == 5, "Summer", "Spring")),
+         courseGrade = if_else(FINAL_GRADE %in% c("E","F"), "0",
+                               if_else(FINAL_GRADE  %in% c("D", "D-"), "1",
+                                       if_else(FINAL_GRADE == "D+", "1.3",
+                                               if_else(FINAL_GRADE == "C-","1.6",
+                                                       if_else(FINAL_GRADE == "C", "2",
+                                                               if_else(FINAL_GRADE == "C+", "2.3",
+                                                                       if_else(FINAL_GRADE == "B-","2.6",
+                                                                               if_else(FINAL_GRADE == "B", "3",
+                                                                                       if_else(FINAL_GRADE == "B+", "3.3",
+                                                                                               if_else(FINAL_GRADE == "A-", "3.6",
+                                                                                                       if_else(FINAL_GRADE == "A","4",
+                                                                                                               if_else(is.na(FINAL_GRADE), "NA", 
+                                                                                                                       if_else(FINAL_GRADE == "A+", "4.3", "-1")))))))))))))) %>% 
+  unite(yrSem, semester, year, sep = " ", remove = FALSE) %>% 
+  mutate(courseGrade = as.numeric(courseGrade),
+         termDuration = difftime(termEndDate, termStartDate, units = "days"),
+    oer = if_else(termStartDate >= "2014-05-19" & COURSE_SUBJECT == "HIST", 1, 0),
+             pass = if_else(roundedGrade <= "C",1,0),
+         dfw = if_else(pass == 1, 0, 1),
+         academicYear = if_else(yrSem %in% c("Fall 2011", "Spring 2012", "Summer 2012"), "2011-2012",
+                                if_else(yrSem %in% c("Fall 2012", "Spring 2013", "Summer 2013"), "2012-2013",
+                                        if_else(yrSem %in% c("Fall 2013", "Spring 2014", "Summer 2014"), "2013-2014",
+                                                if_else(yrSem %in% c("Fall 2014", "Spring 2015", "Summer 2015"), "2014-2015",
+                                                        if_else(yrSem %in% c("Fall 2015", "Spring 2016", "Summer 2016"), "2015-2016",
+                                                                if_else(yrSem %in% c("Fall 2016", "Spring 2017", "Summer 2017"), "2016-2017", "Check"))))))) %>% 
+  select(-TERM_START_DATE,-TERM_END_DATE,-BIRTH_DATE, -INSTRUCTOR_PIDM)
+  
+
 
 ## Convert names to camel case
 ## First conver to lower case
@@ -69,3 +87,19 @@ names(SLCCpersistenceProc)[grepl("_", names(SLCCpersistenceProc))] <- lapply(nam
   })), collapse = "")
   paste0(nmNo_[1], followingWords, collapse = "")
 })
+
+## Add in semester since implementation variable
+## Filter out students younger than 18
+SLCCpersistenceProc <- SLCCpersistenceProc %>% 
+  filter(age>=18) %>% 
+  mutate(semSinceImplementation = 
+           if_else(yrSem == "Summer 2014" & courseSubject == "HIST", 1, 
+                   if_else(yrSem == "Fall 2014" & courseSubject == "HIST",2,
+                           if_else(yrSem == "Spring 2015" & courseSubject == "HIST",3,
+                                   if_else(yrSem == "Summer 2015" & courseSubject == "HIST",4,
+                                           ifelse(yrSem == "Fall 2015" & courseSubject == "HIST",5,
+                                                  if_else(yrSem == "Spring 2016" & courseSubject == "HIST",6,
+                                                          if_else(yrSem == "Summer 2016" & courseSubject == "HIST",7, 
+                                                                  if_else(yrSem == "Fall 2016" & courseSubject == "HIST",8,
+                                                                          if_else(yrSem == "Spring 2017" & courseSubject == "HIST", 9, 0))))))))))
+
