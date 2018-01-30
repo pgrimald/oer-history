@@ -13,11 +13,11 @@ get.package<- function(package){
 }
 
 ## packages required
-packages.needed <- c('dplyr', 'rapportools','readr', 'prophet','sjPlot', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'ggplot2', 'tidyr', 'broom', 'captioner','knitr','extrafont', 'lubridate', 'lettercase') 
+packages.needed <- c('dplyr', 'rapportools','readr', 'prophet','sjPlot', 'optimx', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'ggplot2', 'tidyr', 'broom', 'captioner','knitr','extrafont', 'lubridate', 'lettercase') 
 suppressMessages(sapply(packages.needed, get.package))
 
 ## source ggplot template
-source('~/Documents/git/research/gates/ggplot2theme_min.R')
+source('~/Documents/oer-history/supportingScripts/ggplot2theme_min.R')
 
 
 ## Read in SLCC data
@@ -101,5 +101,6 @@ SLCCpersistenceProc <- SLCCpersistenceProc %>%
                                                   if_else(yrSem == "Spring 2016" & courseSubject == "HIST",6,
                                                           if_else(yrSem == "Summer 2016" & courseSubject == "HIST",7, 
                                                                   if_else(yrSem == "Fall 2016" & courseSubject == "HIST",8,
-                                                                          if_else(yrSem == "Spring 2017" & courseSubject == "HIST", 9, 0))))))))))
+                                                                          if_else(yrSem == "Spring 2017" & courseSubject == "HIST", 9, 0)))))))))) %>% 
+  select(-id)
 
