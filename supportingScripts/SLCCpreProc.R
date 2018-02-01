@@ -60,15 +60,15 @@ SLCCpersistenceProc <- SLCCpersistence %>%
   unite(yrSem, semester, year, sep = " ", remove = FALSE) %>% 
   mutate(courseGrade = as.numeric(courseGrade),
          termDuration = difftime(termEndDate, termStartDate, units = "days"),
-    oer = if_else(termStartDate >= "2014-05-19" & COURSE_SUBJECT == "HIST", 1, 0),
-             pass = if_else(roundedGrade <= "C",1,0),
-         dfw = if_else(pass == 1, 0, 1),
-         academicYear = if_else(yrSem %in% c("Fall 2011", "Spring 2012", "Summer 2012"), "2011-2012",
+    oer = factor(if_else(termStartDate >= "2014-05-19" & COURSE_SUBJECT == "HIST", 1, 0)),
+    pass = factor(if_else(roundedGrade <= "C",1,0)),
+    dfw = factor(if_else(pass == 1, 0, 1)),
+    academicYear = factor(if_else(yrSem %in% c("Fall 2011", "Spring 2012", "Summer 2012"), "2011-2012",
                                 if_else(yrSem %in% c("Fall 2012", "Spring 2013", "Summer 2013"), "2012-2013",
                                         if_else(yrSem %in% c("Fall 2013", "Spring 2014", "Summer 2014"), "2013-2014",
                                                 if_else(yrSem %in% c("Fall 2014", "Spring 2015", "Summer 2015"), "2014-2015",
                                                         if_else(yrSem %in% c("Fall 2015", "Spring 2016", "Summer 2016"), "2015-2016",
-                                                                if_else(yrSem %in% c("Fall 2016", "Spring 2017", "Summer 2017"), "2016-2017", "Check"))))))) %>% 
+                                                                if_else(yrSem %in% c("Fall 2016", "Spring 2017", "Summer 2017"), "2016-2017", "Check")))))))) %>% 
   select(-TERM_START_DATE,-TERM_END_DATE,-BIRTH_DATE, -INSTRUCTOR_PIDM)
   
 
@@ -93,7 +93,7 @@ names(SLCCpersistenceProc)[grepl("_", names(SLCCpersistenceProc))] <- lapply(nam
 SLCCpersistenceProc <- SLCCpersistenceProc %>% 
   filter(age>=18) %>% 
   mutate(semSinceImplementation = 
-           if_else(yrSem == "Summer 2014" & courseSubject == "HIST", 1, 
+           ordered(factor(if_else(yrSem == "Summer 2014" & courseSubject == "HIST", 1, 
                    if_else(yrSem == "Fall 2014" & courseSubject == "HIST",2,
                            if_else(yrSem == "Spring 2015" & courseSubject == "HIST",3,
                                    if_else(yrSem == "Summer 2015" & courseSubject == "HIST",4,
@@ -101,6 +101,6 @@ SLCCpersistenceProc <- SLCCpersistenceProc %>%
                                                   if_else(yrSem == "Spring 2016" & courseSubject == "HIST",6,
                                                           if_else(yrSem == "Summer 2016" & courseSubject == "HIST",7, 
                                                                   if_else(yrSem == "Fall 2016" & courseSubject == "HIST",8,
-                                                                          if_else(yrSem == "Spring 2017" & courseSubject == "HIST", 9, 0)))))))))) %>% 
+                                                                          if_else(yrSem == "Spring 2017" & courseSubject == "HIST", 9, 0)))))))))))) %>% 
   select(-id)
 
