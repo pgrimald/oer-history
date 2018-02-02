@@ -13,7 +13,7 @@ get.package<- function(package){
 }
 
 ## packages required
-packages.needed <- c('dplyr', 'rapportools','readr', 'prophet','sjPlot', 'optimx', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'ggplot2', 'tidyr', 'broom', 'captioner','knitr','extrafont', 'lubridate', 'lettercase') 
+packages.needed <- c('dplyr', 'rapportools','readr', 'prophet','scales','sjPlot', 'optimx', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'ggplot2', 'tidyr', 'broom', 'captioner','knitr','extrafont', 'lubridate', 'lettercase') 
 suppressMessages(sapply(packages.needed, get.package))
 
 ## source ggplot template
@@ -42,8 +42,9 @@ SLCCpersistenceProc <- SLCCpersistence %>%
   mutate(roundedGrade = gsub("\\+|\\-","", FINAL_GRADE),
          age = as.numeric(round(difftime(termStartDate, birthDate, units = "weeks")/52)),
          year = year(termStartDate), 
-         semester = if_else(month(termStartDate) == 8, "Fall",
-                           if_else(month(termStartDate) == 5, "Summer", "Spring")),
+         year = gsub("20","",year),
+         semester = if_else(month(termStartDate) == 8, "F",
+                           if_else(month(termStartDate) == 5, "Su", "Sp")),
          courseGrade = if_else(FINAL_GRADE %in% c("E","F"), "0",
                                if_else(FINAL_GRADE  %in% c("D", "D-"), "1",
                                        if_else(FINAL_GRADE == "D+", "1.3",
@@ -58,17 +59,17 @@ SLCCpersistenceProc <- SLCCpersistence %>%
                                                                                                                if_else(is.na(FINAL_GRADE), "NA", 
                                                                                                                        if_else(FINAL_GRADE == "A+", "4.3", "-1")))))))))))))) %>% 
   unite(yrSem, semester, year, sep = " ", remove = FALSE) %>% 
-  mutate(courseGrade = as.numeric(courseGrade),
+  mutate(yrSem = factor(yrSem), courseGrade = as.numeric(courseGrade),
          termDuration = difftime(termEndDate, termStartDate, units = "days"),
     oer = factor(if_else(termStartDate >= "2014-05-19" & COURSE_SUBJECT == "HIST", 1, 0)),
     pass = factor(if_else(roundedGrade <= "C",1,0)),
     dfw = factor(if_else(pass == 1, 0, 1)),
-    academicYear = factor(if_else(yrSem %in% c("Fall 2011", "Spring 2012", "Summer 2012"), "2011-2012",
-                                if_else(yrSem %in% c("Fall 2012", "Spring 2013", "Summer 2013"), "2012-2013",
-                                        if_else(yrSem %in% c("Fall 2013", "Spring 2014", "Summer 2014"), "2013-2014",
-                                                if_else(yrSem %in% c("Fall 2014", "Spring 2015", "Summer 2015"), "2014-2015",
-                                                        if_else(yrSem %in% c("Fall 2015", "Spring 2016", "Summer 2016"), "2015-2016",
-                                                                if_else(yrSem %in% c("Fall 2016", "Spring 2017", "Summer 2017"), "2016-2017", "Check")))))))) %>% 
+    academicYear = factor(if_else(yrSem %in% c("F 11", "Sp 12", "Su 12"), "11-12",
+                                if_else(yrSem %in% c("F 12", "Sp 13", "Su 13"), "12-13",
+                                        if_else(yrSem %in% c("F 13", "Sp 14", "Su 14"), "13-14",
+                                                if_else(yrSem %in% c("F 14", "Sp 15", "Su 15"), "14-15",
+                                                        if_else(yrSem %in% c("F 15", "Sp 16", "Su 16"), "15-16",
+                                                                if_else(yrSem %in% c("F 16", "Sp 17", "Su 17"), "16-17", "Check")))))))) %>% 
   select(-TERM_START_DATE,-TERM_END_DATE,-BIRTH_DATE, -INSTRUCTOR_PIDM)
   
 
@@ -92,15 +93,26 @@ names(SLCCpersistenceProc)[grepl("_", names(SLCCpersistenceProc))] <- lapply(nam
 ## Filter out students younger than 18
 SLCCpersistenceProc <- SLCCpersistenceProc %>% 
   filter(age>=18) %>% 
-  mutate(semSinceImplementation = 
-           ordered(factor(if_else(yrSem == "Summer 2014" & courseSubject == "HIST", 1, 
-                   if_else(yrSem == "Fall 2014" & courseSubject == "HIST",2,
-                           if_else(yrSem == "Spring 2015" & courseSubject == "HIST",3,
-                                   if_else(yrSem == "Summer 2015" & courseSubject == "HIST",4,
-                                           ifelse(yrSem == "Fall 2015" & courseSubject == "HIST",5,
-                                                  if_else(yrSem == "Spring 2016" & courseSubject == "HIST",6,
-                                                          if_else(yrSem == "Summer 2016" & courseSubject == "HIST",7, 
-                                                                  if_else(yrSem == "Fall 2016" & courseSubject == "HIST",8,
-                                                                          if_else(yrSem == "Spring 2017" & courseSubject == "HIST", 9, 0)))))))))))) %>% 
+  mutate(ethnicity = factor(ethnicity), 
+         semSinceImplementation = 
+           ordered(factor(if_else(yrSem == "Su 14", 1, 
+                   if_else(yrSem == "F 14",2,
+                           if_else(yrSem == "Sp 15",3,
+                                   if_else(yrSem == "Su 15",4,
+                                           ifelse(yrSem == "F 15",5,
+                                                  if_else(yrSem == "Sp 16",6,
+                                                          if_else(yrSem == "Su 16",7, 
+                                                                  if_else(yrSem == "F 16",8,
+                                                                          if_else(yrSem == "Sp 17", 9, 0)))))))))))) %>% 
   select(-id)
 
+
+## Order the year semester combination
+#levels(SLCCpersistenceProc$yrSem)
+## Summer 2011 is added. It needs to be removed
+yrSemOrdered <- paste(rep(c("F", "Sp", "Su"), 6), c(2011,rep(seq(2012, 2016, by = 1),each = 3), 2017))
+yrSemOrdered <- yrSemOrdered[-length(yrSemOrdered)]
+
+SLCCpersistenceProc$yrSem <- factor(SLCCpersistenceProc$yrSem, levels = yrSemOrdered)
+
+rm(SLCCpersistence)

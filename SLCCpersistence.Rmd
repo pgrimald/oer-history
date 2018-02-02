@@ -25,6 +25,16 @@ knitr::opts_chunk$set(fig.width=15, fig.height=20, fig.path='figures/', echo=FAL
 source("~/Documents/oer-history/supportingScripts/SLCCpreProc.R")
 ```
 
+
+<!--# Weekly research meeting feedback
+#02/01/2018
+
+Change point modelling
+
+Bundle all the minorities together
+History OER:Not our, Pell eligible
+Mean grade over time, for each subject -->
+
 # Introduction
 
 A major problem currently facing education in America is the rising cost of obtaining a college degree. Indeed, in 2016 student debt levels reached an all time high of 1.3 trillion dollars (Federal Reserve Bank of New York, 2016). While tuition hikes can account for a large portion of student costs, an additional source of cost increases come from rising textbook prices.  According to the U.S Bureau of Labor Statistics (2016), textbook costs have increased 134% from what they were in 2001. In fact, textbook prices are increasing at a faster rate than health care (U.S. Bureau of Labor Statistics, 2016).  According to the College Board (2016), students spend an average of $1280 on textbooks annually. In sum, textbooks represent a large chunk of the costs involved in obtaining a college degree, and the problem is only getting worse.   
@@ -105,7 +115,7 @@ The SLCC dataset included `r n_distinct(SLCCpersistenceProc$studentId)` students
 
 ```{r demoUgGPA, include = FALSE}
 ## Computing a model to see if the demographic variables determine undergradauite GPA
-mod00 <- lm(cumUgGpa ~ age + ethnicity + gender + everPellEligibleInd + firstGenerationInd, data = SLCCpersistenceProc)
+mod00 <- lm(courseGrade ~ age + ethnicity + gender + everPellEligibleInd + firstGenerationInd, data = SLCCpersistenceProc)
 ```
 
 ```{r UG GPA differences across Subject and instructors, include = FALSE}
@@ -141,6 +151,7 @@ SLCCpersistenceProc %>%
     labs(y = "% of Passing Students", x = "OER", fill = "Fail (0) /Pass (1)") + theme_min()
 ```
 
+
 ```{r oerSemSinceImplementation, caption = "Change in the mean percentage of passing students since implementation of the OER.", cache=TRUE}
 SLCCpersistenceProc %>% 
   add_count(oer, courseSubject,semSinceImplementation) %>% 
@@ -152,7 +163,40 @@ SLCCpersistenceProc %>%
   labs(x = "Semester since implementation of OER", y = "Mean percentage of students", fill = "Pass") + theme_min() +
   scale_fill_manual(values = osColorPalette)
 ```
+```{r fig.width=18, fig.height=6}
+SLCCpersistenceProc %>% 
+  group_by(courseSubject, yrSem) %>% 
+  filter(courseGrade >=0) %>% 
+  summarise(meanCourseGrade = mean(courseGrade, na.rm = TRUE), semCgrade = sd(courseGrade, na.rm = TRUE)/sqrt(sum(!is.na(courseGrade)))) %>% 
+  arrange(courseSubject, yrSem) %>% 
+  ggplot(aes(x = yrSem, y = meanCourseGrade, colour = courseSubject, fill = courseSubject, group = courseSubject)) + geom_line(lwd = 1, alpha = 0.75) + theme_min() +
+  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Academic Year", y = "Mean Course Grade", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Summer 2014')), lty = 2) + scale_y_continuous(limits = c(0,4))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
+  #geom_smooth(stat = "smooth", aes(fill = courseSubject))
+# + scale_x_date(labels = date_format("%m-%Y"), date_breaks = "8 months") 
+```
 
+
+```{r fig.width=18, fig.height=6}
+SLCCpersistenceProc %>% 
+  group_by(courseSubject, yrSem) %>% 
+  #filter(dfw == 1) %>% View()
+  summarise(dfwRate = sum(dfw == 1)/sum(!is.na(dfw)), ndfwRate = sum(dfw == 0)/sum(!is.na(dfw))) %>% 
+  ggplot(aes(x = yrSem, y = dfwRate, colour = courseSubject, fill = courseSubject, group = courseSubject)) + geom_line(lwd = 1, alpha = 0.75) + theme_min() +
+  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "DFW Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Summer 2014')), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
+  #geom_smooth(stat = "smooth", aes(fill = courseSubject))
+# + scale_x_date(labels = date_format("%m-%Y"), date_breaks = "8 months") 
+```
+
+```{r fig.width=18, fig.height=6}
+SLCCpersistenceProc %>% 
+  group_by(courseSubject, yrSem) %>% 
+  #filter(dfw == 1) %>% View()
+  summarise(dfwRate = sum(dfw == 1)/sum(!is.na(dfw)), ndfwRate = sum(dfw == 0)/sum(!is.na(dfw))) %>% 
+  ggplot(aes(x = yrSem, y = ndfwRate, colour = courseSubject, fill = courseSubject, group = courseSubject)) + geom_line(lwd = 1, alpha = 0.75) + theme_min() +
+  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "Pass Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Summer 2014')), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
+  #geom_smooth(stat = "smooth", aes(fill = courseSubject))
+# + scale_x_date(labels = date_format("%m-%Y"), date_breaks = "8 months") 
+```
 
 ```{r prepostOERgrade, caption = "Change in mean grade of students before and after introduction of OER.", cache=TRUE}
 SLCCpersistenceProc %>% 
@@ -177,6 +221,29 @@ SLCCpersistenceProc %>%
   geom_errorbar(aes(ymin = meanGrade - semGrade, ymax = meanGrade + semGrade), width = .1, position = position_dodge(.9)) + ylim(c(0,4)) + facet_wrap(~courseSubject, scales = "free_x") + theme_min() +
   labs(y = "Mean Student Grade", x = "Semester Since OER Implementation")
 ```
+
+
+## Simplest model
+```{r}
+### significant negative effect of oer (-0.10).
+simpleMod1 <- SLCCpersistenceProc %>% 
+  glm(pass ~ oer, data = ., family = binomial)
+
+### Semester wins, oer becomes insignificant and smaller
+simpleMod2 <- SLCCpersistenceProc %>% 
+  glmer(pass ~ (1|academicYear) + (1|courseSubject/instructorId) + semester + oer, data = ., family = binomial)
+
+### oer becomes insignificant and smaller
+simpleMod3 <- SLCCpersistenceProc %>% 
+  glmer(pass ~ (1|academicYear/semester) + (1|courseSubject/instructorId) + oer, data = ., family = binomial)
+
+### oer becomes insignificant and smaller
+simpleMod4 <- SLCCpersistenceProc %>% 
+  glmer(pass ~ (1|semester/academicYear) + (1|courseSubject/instructorId) + oer, data = ., family = binomial)
+plot_model(simpleMod4, type = "re")
+
+```
+
 
 
 ### Impact on pass rates
@@ -260,30 +327,40 @@ gradeMod0Base <- SLCCpersistenceProc %>%
 ## Mod1: Random effects + demographics
 gradeMod1Add <- SLCCpersistenceProc %>% 
   lmer(courseGrade ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + everPellEligibleInd + firstGenerationInd, data = .)
+
+gradeMod1AddSummary <- gradeMod1Add %>% tidy()
 ```
 
 ```{r}
 ## Mod2: Random effects + Demographics + subject/performance related factors
 gradeMod2Add <- SLCCpersistenceProc %>% 
   lmer(courseGrade ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + cumUgGpa + everPellEligibleInd + firstGenerationInd, data = .)
+
+gradeMod2AddSummary <- gradeMod2Add %>% tidy()
 ```
 
 ```{r}
 ## Mod3: Random effects + Demographics + subject/performance related factors + treatment
 gradeMod3Add <- SLCCpersistenceProc %>% 
   lmer(courseGrade ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + cumUgGpa + everPellEligibleInd + oer + semSinceImplementation + firstGenerationInd, data = .)
+
+gradeMod3AddSummary <- gradeMod3Add %>% tidy()
 ```
 
 ```{r Grade Omnibus Model Interactive, cache=TRUE}
 ## Mod4: Random effects + Demographics + subject/performance related factors + treatment + interaction terms
 gradeMod4Int <- SLCCpersistenceProc %>% 
   lmer(courseGrade ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + gender + firstGenerationInd + fullTime + oer + ethnicity + everPellEligibleInd + semSinceImplementation + oer:ethnicity + oer:everPellEligibleInd + oer:semSinceImplementation, data = .)
+
+gradeMod4IntSummary <- gradeMod4Int %>% tidy()
 ```
 
 #### Model comparison   
 
 ```{r course AIC}
 AIC(gradeMod0Base, gradeMod1Add, gradeMod2Add,gradeMod3Add, gradeMod4Int)
+
+stargazer::stargazer(gradeMod1Add,gradeMod2Add)
 ```
 
 ```{r course Model Comparison}
@@ -299,13 +376,27 @@ AIC(gradeMod0Base, gradeMod1Add, gradeMod2Add,gradeMod3Add, gradeMod4Int)
 
 ## Impact on Drop/Failure/Withdrawal Rate
 
+```{r prepostOERdfw, caption = "Change in mean percentage of passing students before and after introduction of OER.", cache=TRUE}
+SLCCpersistenceProc %>% 
+  filter(courseSubject == "HIST") %>% 
+  group_by(oer, dfw) %>% 
+  summarise(perc = round((sum(!is.na(dfw))/nrow(.)) * 100), groupSize = n()) %>% 
+  ggplot(aes(x = oer, y = perc, fill = dfw)) + 
+    geom_col(position = "dodge") + 
+    geom_text(aes(label = groupSize), position = position_dodge(width = 1), vjust = -0.5) + scale_fill_manual(values = osColorPalette) +
+    labs(y = "% of Passing Students", x = "OER", fill = "Not dfw (0) /DFW (1)") + theme_min()
+```
+
 ```{r oerSemSinceImplementationDFW, caption = "Change in the mean percentage of dfw students since implementation of the OER.", cache=TRUE}
 SLCCpersistenceProc %>% 
-  group_by(oer, courseSubject, semSinceImplementation) %>% 
-  summarise(meanPerc = round(sum(dfw)/n() * 100), groupSize = n()) %>% 
-  ggplot(aes(x = factor(semSinceImplementation), y = meanPerc)) + 
+  add_count(oer, courseSubject,semSinceImplementation) %>% 
+  group_by(oer, courseSubject, dfw, semSinceImplementation, n) %>% 
+  count(dfw) %>% 
+  mutate(meanDFW = round(nn/n * 100)) %>% 
+  ggplot(aes(x = semSinceImplementation, y = meanDFW, fill = dfw)) + 
   geom_col() + facet_wrap(~courseSubject, scales = "free_x") + 
-  labs(x = "Semester since implementation of OER", y = "Mean percentage of DFW students") + theme_min()
+  labs(x = "Semester since implementation of OER", y = "Mean percentage of DFW students", fill = "DFW") + theme_min() +
+  scale_fill_manual(values = osColorPalette)
 ```
 
 ```{r dfwRateBase, cache=TRUE}
