@@ -4,15 +4,9 @@ author: "The OpenStax Research Team, Salt Lake Community College"
 date: '`r format(Sys.time(), "%B %d, %Y")`'
 fontsize: 12pt
 output: 
-  html_notebook:
-    code_folding: hide
+  html_document: 
     css: supportingScripts/style.css
-    highlight: pygments
-    theme: cerulean
     toc: yes
-    toc_float:
-      collapsed: yes
-      smooth_scroll: yes
 font-family: 'Avenir'     
 editor_options: 
   chunk_output_type: inline
@@ -70,7 +64,7 @@ The authors collected the following datapoints for the history course recorded 8
 * academic background (e.g., cumulative undergraduate GPA, prior achievement scores such as college placement test scores), and 
 * course performance data (e.g., final course grade, credits earned) 
 
-In addition, this dataset included the above parameters for 2 other courses (Political Science, Economics) that exclusibvely used conventional textbooks. Data from these 2 courses were used to tease apart any temporal fluctuations in student performance that occurred even without the use of OER. 
+In addition, this dataset included the above parameters for 2 other courses (Political Science, Economics) that exclusively used conventional textbooks. Data from these 2 courses were used to tease apart any temporal fluctuations in student performance that occurred even without the use of OER. 
 
 ### Student Demographics
 
@@ -114,7 +108,7 @@ SLCCpersistenceProc %>%
 The SLCC dataset included `r n_distinct(SLCCpersistenceProc$studentId)` students (female =`r gender$n[1]`, male = `r gender$n[2]`, unreported = `r gender$n[3]`). Out of these students, `r pell$yes`% were pell eligible, `r enrollmentStatus$FullTime`% were in full-time programs, and `r firstGen$yes`% identified as first generation students. 
 
 ```{r demoUgGPA, include = FALSE}
-## Computing a model to see if the demographic variables determine undergradauite GPA
+## Computing a model to see if the demographic variables determine undergraduate GPA
 mod00 <- lm(courseGrade ~ age + ethnicity + gender + everPellEligibleInd + firstGenerationInd, data = SLCCpersistenceProc)
 ```
 
@@ -125,7 +119,7 @@ mod01 <- lm(cumUgGpa ~ courseSubject + instructorId, data = SLCCpersistenceProc)
 ```{r ethnicity based differences in UG GPA, fig.width=15, warning=FALSE, error=FALSE}
 SLCCpersistenceProc %>%
   ggplot(aes(x = ethnicity, y = cumUgGpa)) +
-  geom_boxplot() + theme_min() +
+  geom_boxplot(alpha = 0.3) + theme_min() +
   labs(x = "Ethnicity", y = "Course Grade")
 ```
 
@@ -152,7 +146,7 @@ SLCCpersistenceProc %>%
 ```
 
 
-```{r oerSemSinceImplementation, caption = "Change in the mean percentage of passing students since implementation of the OER.", cache=TRUE}
+```{r oerSemSinceImplementation, caption = "Change in the mean percentage of passing students since implementation of the OER.", include = FALSE}
 SLCCpersistenceProc %>% 
   add_count(oer, courseSubject,semSinceImplementation) %>% 
   group_by(oer, courseSubject, pass, semSinceImplementation, n) %>% 
@@ -163,37 +157,38 @@ SLCCpersistenceProc %>%
   labs(x = "Semester since implementation of OER", y = "Mean percentage of students", fill = "Pass") + theme_min() +
   scale_fill_manual(values = osColorPalette)
 ```
-```{r fig.width=18, fig.height=6}
+
+```{r fig.width=10, fig.height=6}
 SLCCpersistenceProc %>% 
   group_by(courseSubject, yrSem) %>% 
   filter(courseGrade >=0) %>% 
   summarise(meanCourseGrade = mean(courseGrade, na.rm = TRUE), semCgrade = sd(courseGrade, na.rm = TRUE)/sqrt(sum(!is.na(courseGrade)))) %>% 
   arrange(courseSubject, yrSem) %>% 
   ggplot(aes(x = yrSem, y = meanCourseGrade, colour = courseSubject, fill = courseSubject, group = courseSubject)) + geom_line(lwd = 1, alpha = 0.75) + theme_min() +
-  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Academic Year", y = "Mean Course Grade", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Summer 2014')), lty = 2) + scale_y_continuous(limits = c(0,4))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
+  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Academic Year", y = "Mean Course Grade", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Su 14')), lty = 2) + scale_y_continuous(limits = c(0,4))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
   #geom_smooth(stat = "smooth", aes(fill = courseSubject))
 # + scale_x_date(labels = date_format("%m-%Y"), date_breaks = "8 months") 
 ```
 
 
-```{r fig.width=18, fig.height=6}
+```{r fig.width=10, fig.height=6}
 SLCCpersistenceProc %>% 
   group_by(courseSubject, yrSem) %>% 
   #filter(dfw == 1) %>% View()
   summarise(dfwRate = sum(dfw == 1)/sum(!is.na(dfw)), ndfwRate = sum(dfw == 0)/sum(!is.na(dfw))) %>% 
   ggplot(aes(x = yrSem, y = dfwRate, colour = courseSubject, fill = courseSubject, group = courseSubject)) + geom_line(lwd = 1, alpha = 0.75) + theme_min() +
-  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "DFW Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Summer 2014')), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
+  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "DFW Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Su 14')), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
   #geom_smooth(stat = "smooth", aes(fill = courseSubject))
 # + scale_x_date(labels = date_format("%m-%Y"), date_breaks = "8 months") 
 ```
 
-```{r fig.width=18, fig.height=6}
+```{r fig.width=10, fig.height=6}
 SLCCpersistenceProc %>% 
   group_by(courseSubject, yrSem) %>% 
   #filter(dfw == 1) %>% View()
   summarise(dfwRate = sum(dfw == 1)/sum(!is.na(dfw)), ndfwRate = sum(dfw == 0)/sum(!is.na(dfw))) %>% 
   ggplot(aes(x = yrSem, y = ndfwRate, colour = courseSubject, fill = courseSubject, group = courseSubject)) + geom_line(lwd = 1, alpha = 0.75) + theme_min() +
-  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "Pass Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Summer 2014')), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
+  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "Pass Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Su 14')), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
   #geom_smooth(stat = "smooth", aes(fill = courseSubject))
 # + scale_x_date(labels = date_format("%m-%Y"), date_breaks = "8 months") 
 ```
@@ -258,45 +253,78 @@ In addition to a baseline model that only included the random effects, we comput
 
 We compared the AIC values and selected the model with the lowest AIC value as our winning model. We also compared our winning model against our baseline model to ensure that these were significantly different.
 
-```{r passRate, cache=TRUE}
+```{r passRate, cache=TRUE, include=FALSE}
 ## Baseline model including only random effects
 passMod0Base <- SLCCpersistenceProc %>% 
-     glmer(pass ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId), data = ., family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
+     glmer(pass ~ (1|academicYear) + semester + (1|courseSubject/instructorId), data = ., family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
      optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
 ```
 
-```{r pass Additive Model 1, cache=TRUE}
+```{r pass Additive Model 1, cache=TRUE, include=FALSE}
 ## Mod1: Random effects + demographics
 passMod1Add <- SLCCpersistenceProc %>% 
-  glmer(pass ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + everPellEligibleInd + firstGenerationInd, data = ., family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
+  glmer(pass ~ (1|academicYear) + semester + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + everPellEligibleInd + firstGenerationInd, data = ., family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
      optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
 ```
 
-```{r pass Additive Model 2}
+```{r pass Additive Model 2, include=FALSE}
 ## Mod2: Random effects + Demographics + subject/performance related factors
 passMod2Add <- SLCCpersistenceProc %>% 
-  glmer(pass ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + cumUgGpa + everPellEligibleInd + firstGenerationInd, data = ., family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE, optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
+  glmer(pass ~ (1|academicYear) + semester + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + cumUgGpa + everPellEligibleInd + firstGenerationInd, data = ., family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE, optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
 
 ```
 
 ```{r pass Additive Model 3, include = FALSE}
 ## Mod3: Random effects + Demographics + subject/performance related factors + treatment
 passMod3Add <- SLCCpersistenceProc %>% 
-  glmer(pass ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + cumUgGpa + everPellEligibleInd + oer + semSinceImplementation + firstGenerationInd, data = ., family = binomial) #, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE, optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE))
+  glmer(pass ~ (1|academicYear) + semester + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + cumUgGpa + everPellEligibleInd + oer + semSinceImplementation + firstGenerationInd, data = ., family = binomial) #, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE, optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE))
 ```
 
 
-```{r pass Interactive model 4, cache=TRUE}
+```{r pass Interactive model 4, cache=TRUE, include=FALSE}
 ## Mod4: Random effects + Demographics + subject/performance related factors + treatment + interaction terms
 passMod4Int <- SLCCpersistenceProc %>% 
-  glmer(pass ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + gender + firstGenerationInd + fullTime + cumUgGpa + ethnicity + everPellEligibleInd + oer + semSinceImplementation + oer:ethnicity + oer:everPellEligibleInd, data = ., family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE, optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
+  glmer(pass ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + gender + firstGenerationInd + fullTime + cumUgGpa + ethnicity + everPellEligibleInd + oer + semSinceImplementation + oer:ethnicity + oer:everPellEligibleInd, data = ., family = binomial)
 ```
+
+## Pass model
+
+```{r effect size, include = FALSE}
+t <- SLCCpersistenceProc # %>% 
+#     filter(courseSubject == "HIST")
+library(effsize)
+d.gpa <- cohen.d(t$cumUgGpa,t$oer, na.rm = TRUE)
+d.pell <- cohen.d(as.numeric(t$everPellEligibleInd == "Y"),t$oer, na.rm = T)
+d.enroll <- cohen.d(as.numeric(t$fullTime=='Full-Time'),t$oer, na.rm = T)
+d.age <- cohen.d(t$age,t$oer, na.rm = TRUE)
+d.firstgen <- cohen.d(as.numeric(t$firstGenerationInd == "Y"),t$oer, na.rm = T)
+```
+
+```{r LATEST OPENED MODELS}
+m1 <- SLCCpersistenceProc %>%
+    glmer(pass ~ semester + academicYear + courseSubject + cumUgGpa + ethnicity + everPellEligibleInd + firstGenerationInd + fullTime + (1|instructorId), family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE, optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data =.)
+    
+m2 <- SLCCpersistenceProc %>%
+    glmer(pass ~ semester + academicYear + courseSubject + cumUgGpa + ethnicity + everPellEligibleInd + firstGenerationInd + fullTime + oer + (1|instructorId), family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE, optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data =.)
+
+# Interactive model
+m3 <- SLCCpersistenceProc %>%
+    glmer(pass ~ semester + academicYear + courseSubject + cumUgGpa + ethnicity + everPellEligibleInd + firstGenerationInd + fullTime + oer + everPellEligibleInd:oer + (1|instructorId), family = binomial, control = glmerControl(optimizer = "optimx", calc.derivs = FALSE, optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data =.)
+
+    
+m1.m2 <- anova(m1,m2)
+m1.m3 <- anova(m1,m3)
+
+stargazer::stargazer(m4,m5, m6, type = "text")
+
+```
+
 
 
 #### Pass Model comparison   
 
-```{r}
-stargazer::stargazer(passMod0, passMod1Add, passMod2Add, passMod4Int, type = "text")
+```{r include=FALSE}
+stargazer::stargazer(passMod0Base, passMod1Add, passMod2Add, passMod4Int, type = "text")
 ```
 
 
@@ -331,7 +359,7 @@ gradeMod1Add <- SLCCpersistenceProc %>%
 gradeMod1AddSummary <- gradeMod1Add %>% tidy()
 ```
 
-```{r}
+```{r grade mod 2, include=FALSE}
 ## Mod2: Random effects + Demographics + subject/performance related factors
 gradeMod2Add <- SLCCpersistenceProc %>% 
   lmer(courseGrade ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + cumUgGpa + everPellEligibleInd + firstGenerationInd, data = .)
@@ -339,7 +367,7 @@ gradeMod2Add <- SLCCpersistenceProc %>%
 gradeMod2AddSummary <- gradeMod2Add %>% tidy()
 ```
 
-```{r}
+```{r grade mod 3}
 ## Mod3: Random effects + Demographics + subject/performance related factors + treatment
 gradeMod3Add <- SLCCpersistenceProc %>% 
   lmer(courseGrade ~ (1|academicYear) + (1|semester) + (1|courseSubject/instructorId) + age + ethnicity + gender + fullTime + cumUgGpa + everPellEligibleInd + oer + semSinceImplementation + firstGenerationInd, data = .)
@@ -410,7 +438,7 @@ dfwMod0BaseSummary <- dfwMod0Base %>%
   tidy()
 ```
 
-```{r}
+```{r dfw base}
 # dfwMod0Base1 <- SLCCpersistenceProc %>% 
 #      glmer(dfw ~ (1|academicYear) * (1|semester) + (1|courseSubject/instructorId), data = ., family = binomial)
 # sjp.glmer(dfwMod0Base1)

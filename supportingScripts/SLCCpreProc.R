@@ -110,7 +110,7 @@ SLCCpersistenceProc <- SLCCpersistenceProc %>%
 ## Order the year semester combination
 #levels(SLCCpersistenceProc$yrSem)
 ## Summer 2011 is added. It needs to be removed
-yrSemOrdered <- paste(rep(c("F", "Sp", "Su"), 6), c(2011,rep(seq(2012, 2016, by = 1),each = 3), 2017))
+yrSemOrdered <- paste(rep(c("F", "Sp", "Su"), 6), c(11,rep(seq(12, 16, by = 1),each = 3), 17))
 yrSemOrdered <- yrSemOrdered[-length(yrSemOrdered)]
 
 SLCCpersistenceProc$yrSem <- factor(SLCCpersistenceProc$yrSem, levels = yrSemOrdered)
