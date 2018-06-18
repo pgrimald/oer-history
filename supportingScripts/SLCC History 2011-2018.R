@@ -13,7 +13,7 @@ get.package<- function(package){
 }
 
 ## packages required
-packages.needed <- c('tidyverse', 'rapportools', 'prophet','scales','sjPlot', 'optimx', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'captioner','knitr','extrafont', 'lubridate', 'lettercase') 
+packages.needed <- c('tidyverse', 'rapportools', 'RColorBrewer', 'prophet','scales','sjPlot', 'optimx', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'captioner','knitr','extrafont', 'lubridate', 'lettercase') 
 suppressMessages(sapply(packages.needed, get.package))
 
 ## source ggplot template
