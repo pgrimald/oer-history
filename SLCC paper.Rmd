@@ -1,0 +1,341 @@
+---
+title             : "Relation between OER adoption and persistence in higher education"
+shorttitle        : ""
+
+author: 
+  - name          : "Debshila Basu Mallick"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "Postal address"
+    email         : "debshila@rice.edu"
+  - name          : "Phillip J. Grimaldi"
+    affiliation   : "1"
+  - name          : "Jason Whittle"
+    affiliation   : "2"
+  - name          : "Andrew J. Waters"
+    affiliation   : "1"
+  - name          : "Ted Moore"
+    affiliation   : "2"
+  - name          : "Richard Baraniuk"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "OpenStax, Rice University"
+  - id            : "2"
+    institution   : "Salt Lake Community College"
+
+author_note: |
+  Cognitive Science Postdoctoral Research Associate, OpenStax, Rice University.
+  Director of Research, OpenStax, Rice University.
+
+  Enter author note here.
+
+abstract: |
+  A major problem currently facing education in America is the rising cost of obtaining a college degree. While tuition hikes predominate student costs, an additional source of expense is from textbook prices that have been found to rise at an alarming rate (134% increase since 2001; U.S. Bureau of Labor Statistics, 2016).
+
+  In response to rising textbook costs, there has been a surge of interest in open educational resources (OER). OER differs from traditional education materials in that they are freely available. While OER has undoubtedly been successful at reducing student costs, the critical question is whether these cost savings translate into improved student academic outcomes. OER is presumed to help in this regard by improving access to beneficial learning materials, however research in this area is has found equivocal results (Hilton, 2016). While some studies found that adoption of open textbooks resulted in positive academic outcomes (Lovett et al., 2008), others have found no effect (Hilton et al., 2013), or a negative effect (Lawrence & Lester, 2018). The overarching goal of this project is to explore how adoption of an open textbook affects student academic outcomes.
+
+  We examined the effect of transitioning from a conventional textbook to an open textbook for all sections of a required course at the Salt Lake Community College (SLCC). This was a unique opportunity to examine the impact of open textbook use because this large scale adoption was institutionally mandated, which implied that, unlike other situations where instructors generally opt in to adopt an open textbook for their own course, all instructors were required to use the same textbook for the course removing any concerns of self-selection bias. 
+
+  In collaboration with SLCC, we acquired student academic outcomes before and after transition to the open textbook, demographic, prior achievement, and other parameters related to the course. We attempted to ensure that any possible changes in the outcomes were primarily due to the open textbook adoption and not due to any temporal factors that naturally permeated across other comparable disciplines. In order to rule out other temporal confounds, we contrasted academic outcomes in the history course with other comparable disciplines, which continued to exclusively use traditional textbooks during the same period.
+
+  Preliminary results indicate that there was no positive effect of open textbook adoption on the number of students passing the course. Further analyses are underway, and the findings will be discussed in light of expectations surrounding OER efficacy, and integration of OER into a course curriculum.
+
+  
+keywords          : "OER, Persistence, Higher Education"
+wordcount         : "X"
+
+bibliography      : ["r-references.bib"]
+
+figsintext        : no
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : yes
+mask              : no
+fig.cap           : yes
+class             : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r load_packages, include = FALSE}
+library("papaja")
+```
+
+```{r analysis_preferences}
+# Seed for random number generation
+set.seed(42)
+```
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE, comment=""}
+source("~/Documents/oer-history/supportingScripts/SLCC History 2011-2018.R")
+```
+
+
+A major problem currently facing education in America is the rising cost of obtaining a college degree. Indeed, in 2016 student debt levels reached an all time high of 1.3 trillion dollars (Federal Reserve Bank of New York, 2016). While tuition hikes can account for a large portion of student costs, an additional source of cost increases come from rising textbook prices.  According to the U.S Bureau of Labor Statistics (2016), textbook costs have increased 134% from what they were in 2001. In fact, textbook prices are increasing at a faster rate than health care (U.S. Bureau of Labor Statistics, 2016).  According to the College Board (2016), students spend an average of $1280 on textbooks annually. In sum, textbooks represent a large chunk of the costs involved in obtaining a college degree, and the problem is only getting worse.   
+
+In response to rising textbook costs, there has been a surge of interest in open educational resources (OER). OER differs from traditional education materials in that they are freely available, and usually easily accessible online. The OER movement in education has not only impacted the US but has had a widespread global influence [@Farrow2015].
+
+<!--Since 2012, OpenStax has been a leader in the OER movement, providing a large library of free, high-quality, open-source textbooks. OpenStax currently offers 27 intro level textbooks, which have been used in nearly 30% of all degree granting institutions in the United States. Over 1 million students have used an OpenStax books to date, saving students an estimated $35 million. Importantly, growth in the use of OpenStax texts has been exponential-- the estimated cost savings to date are expected to double in 2017.-->
+
+While OpenStax has been undoubtedly successful at reducing student costs, the critical question is whether these cost savings translate into improved student success. OER is presumed to help in this regard by improving access to beneficial learning materials, however research in this area is sparse. The overarching goal of this project is to explore how adoption of an OpenStax textbook affects student success, with special attention paid to low-income students.     
+
+Existing research suggests that high textbook costs have a negative impact on academic success. A recent survey found that an alarming proportion of students have dropped (27%) or withdrew (21%) from a course due to the cost of textbooks (Florida Virtual Campus, 2012). Worse, this same survey found that nearly 44% of students report that they earned a poor grade because they could not afford the textbook. We hypothesize that adopting a free OpenStax book will a) reduce dropped classes, b) reduce withdrawn classes, and c) improve final grades. 
+
+# Methods
+We report how we determined our sample size, all data exclusions (if any), all manipulations, and all measures in the study. <!-- 21-word solution (Simmons, Nelson & Simonsohn, 2012; retrieved from http://ssrn.com/abstract=2160588) -->
+
+## Material
+
+## Procedure
+
+**The authors collected the following datapoints for the history course at SLCC recorded 8 semesters prior to (Fall, 2011), and 9 semesters following (Spring, 2017) the transition to OER** :   
+
+* _course metadata_ (e.g., instructor id, course number, section id, term start and end dates) 
+* _student demographics_ (e.g., ethnicity, gender, pell eligibility, enrolment status)
+* _academic background_ (e.g., cumulative undergraduate GPA, prior achievement scores such as college placement test scores), and 
+* _course performance_ (e.g., final course grade, credits earned) 
+
+In addition, this dataset included the above parameters for 2 other courses (Political Science, Economics) that exclusively used conventional textbooks. Unlike other studies examining impact of OER on student performance, we used data from these 2 courses were used to tease apart any temporal fluctuations in student performance that occurred even without the use of OER. 
+
+Things to address here: difficulty of traditional textbook and oer content. Previous studies have failed to precisely detail the traditional and open textbooks used, and compare the difficulty of the traditional textbook and the oer content used [@Griggs2017]. There were XX traditional textbooks used 
+
+
+
+## Participants
+
+
+```{r student counts}
+# count the number of distinct students
+sCount <- SLCC_11_18_proc %>% 
+  summarize(`unique students` = n_distinct(studentId)) %>% 
+  unlist()
+
+# Get count of underage students
+underAge <- SLCC_11_18_proc %>% 
+  filter(age<18)
+
+# Filter out underage students from main dataset
+SLCC_11_18_proc <- SLCC_11_18_proc %>% 
+  filter(age >= 18)
+
+# Check if subjects repeated a class or had taken more than one courses or both
+sCourseRep <- SLCC_11_18_proc %>% 
+  filter(rep == 1) %>% 
+  group_by(studentId, courseSubject) %>% 
+  count() %>% 
+  group_by(studentId) %>% 
+  count() %>% 
+  ungroup() %>% 
+  count(nn)
+
+```
+
+We had a total of `sCount` student records in the dataset. Out of these records, `r nrow(underAge)` students were less than 18 years of age when the term started and  were  therefore removed from further analyses. There were `r length(dupeIDs)` students who had more than one records in the dataset. These students may have either repeated a specific course, or taken courses in more than one course subjects included in this dataset, or both, resulting in an overall `r sum(duplicated(SLCC_11_18_proc$studentId), na.rm = TRUE)` additional records for these students. 
+
+```{r gender}
+gender <- SLCC_11_18_proc %>% 
+  distinct(studentId, .keep_all = TRUE) %>% 
+  count(gender)
+```
+
+```{r pellElig}
+pell <- SLCC_11_18_proc %>%
+          distinct(studentId, .keep_all = TRUE) %>%
+          count(everPellEligibleInd) %>% 
+          mutate(pell = round(n/sum(n) * 100))
+#          summarise(yes = round(sum(everPellEligibleInd == "Y")/n()*100), no = round(sum(everPellEligibleInd == "N")/n()*100))
+```
+
+```{r enrollment}
+enrollmentStatus <- SLCC_11_18_proc %>% 
+  distinct(studentId, .keep_all = TRUE) %>% 
+  count(fullTime) %>% 
+  mutate(enroll = round(n/sum(n) * 100))
+  # summarise(FullTime = round(sum(fullTime == "Full-Time")/n() * 100), 
+  #          PartTime = round(sum(fullTime == "Part-Time")/n() * 100))
+```
+
+```{r firstGen}
+firstGen <- SLCC_11_18_proc %>%
+  distinct(studentId, .keep_all = TRUE) %>%
+  count(firstGenerationInd) %>% 
+  mutate(firstGen = round(n/sum(n) * 100))
+  # summarise(yes = round(sum(firstGenerationInd == "Y")/n() * 100), 
+  #           no = round(sum(firstGenerationInd == "N")/n() * 100),
+            # unReported = round(sum(firstGenerationInd == "U")/n() * 100))
+```
+
+```{r ethnicity, fig.cap="Ethnic diversity in the student population at SLCC."}
+SLCC_11_18_proc %>%
+  distinct(studentId, .keep_all = TRUE) %>%
+  count(ethnicity) %>%
+  mutate(percRace = round(n / sum(n) * 100)) %>%
+  ggplot(aes(x = reorder(ethnicity, percRace), y = percRace)) +
+    geom_col() + theme_minimal() + coord_flip() +
+    labs(x = "Ethnicity", y = "Percentage of Students") 
+```
+The dataset obtained from SLCC included `r n_distinct(SLCC_11_18_proc$studentId)` students (female =`r gender$n[1]`, male = `r gender$n[2]`, unreported = `r gender$n[3]`). Out of these students, `r pell$pell[pell$everPellEligibleInd == "Y"]`% were pell eligible, `r enrollmentStatus$enroll[enrollmentStatus$fullTime == "Full-Time"]`% were in full-time programs, and `r firstGen$firstgen[firstGen$firstGenerationInd == "Y"]`% identified as first generation students. 
+
+
+## Data analysis
+
+We examined the impact of OER adoption in terms of three different measures of student performance:     
+* _Course completion:_ Based on whether students received any grade other than an "Incomplete" on the course.
+* _Pass rate:_ Based on whether students achieved "C-" or better in the course. If a student achieved a "C-" or better, then the student was considered to have passed (1) the class, whereas, if a student received a grade lower than a "C-", s/he was considered to have failed (0) the class.
+
+* _Average grade:_ We also converted the student grades into a continuous measure that corresponded to the grade point (0-4) for the course.
+
+We used `r cite_r("r-references.bib")` for all our analyses. 
+
+# Results
+
+## Course completion
+
+Out of the `r nrow(SLCCpersistencProc)` student records, only `r sum(SLCC_11_18_proc$finalGrade == "I")` cases had an incomplete grade. It must be pointed out that despite the small number of incomplete grades, these grades were only in the control courses (Economics, Political Science). Therefore, the current dataset did not present us with sufficient variability to examine differences in course completion rates across different conditions.
+
+```{r course completion}
+# Completion is near ceiling
+completion <- SLCC_11_18_proc %>% 
+  group_by(courseSubject) %>% 
+  summarize(completion = sum(finalGrade != "I"), n = n(studentId), completionrate = completion/n)
+
+# Incomplete grades by course
+incomplete <- SLCC_11_18_proc %>% 
+  filter(finalGrade == "I") %>% 
+  group_by(courseSubject) %>% 
+  count() 
+```
+
+## Pass rates
+
+We defined a grade above or equal to "C-" as a passing grade. Overall, out of our `r nrow(SLCC_11_18_proc)` records, `r sum(as.numeric(SLCC_11_18_proc$pass))` records showed a passing grade. 
+
+```{r pass rate, fig.cap="", fig.width=15}
+passRate <- SLCC_11_18_proc %>% 
+  add_count(courseSubject, oer, yrSem) %>% 
+  ungroup() %>% 
+  group_by(courseSubject, oer, yrSem, n) %>%
+  summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n)) 
+
+passRate %>% 
+  ggplot(aes(x = yrSem, y = passRate, color= courseSubject, group = courseSubject)) + geom_line() + 
+  geom_point() + geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass), width =0.1) +
+  scale_colour_manual(values = osColorPalette) + theme_min() + 
+  labs(x = "Semester-Year", y = "Pass Rate") + facet_wrap(~oer, scales = "free_x", labeller = labeller(oer = labels)) + scale_y_continuous(limits = c(0,1))
+```
+
+```{r pass rate pilot period, fig.width=5}
+# History was piloted during F15 and Sp 16
+pilotSems <- c("F 15", "Sp 16")
+# Change OER labels
+labels <- c(`1` = "Used Open textbook", `0` = "Used Traditional Textbook")
+
+passRate %>% 
+  filter(courseSubject == "HIST" & yrSem %in% pilotSems) %>% 
+  ggplot(aes(x = yrSem, y = passRate, colour = factor(oer), group = factor(oer))) + geom_point() + geom_line()  + theme_min() + 
+  scale_colour_manual(values = osColorPalette, labels = c("Traditional Textbook", "Open Textbook")) + 
+  labs(x = "Semester Year", y = "Pass Rate", colour = "Textbook Type") + 
+  geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass, colour = factor(oer)), width = .1) + scale_y_continuous(limits = c(0,1))
+```
+
+## Average grade
+
+```{r avg grade, fig.width=10, fig.height=8}
+avgGrade <- SLCC_11_18_proc %>% 
+  group_by(courseSubject, oer, yrSem) %>%
+  summarise(mGrade = mean(courseGrade, na.rm = TRUE), 
+            n = sum(!is.na(unique(studentId))),
+            semGrade = sd(courseGrade)/sqrt(n)) 
+
+# Plot the 
+avgGrade %>% 
+  ggplot(aes(x = yrSem, y = mGrade, color = courseSubject, group = courseSubject)) + 
+  geom_line() + 
+  geom_point() + 
+  theme_min() +
+  geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade), width = .2) + 
+  scale_colour_manual(values = osColorPalette) +  
+  geom_ribbon(aes(x=yrSem, y=mGrade, ymax=mGrade + semGrade, ymin=mGrade - semGrade, fill = courseSubject), alpha=0.2, lwd = .02) +
+  labs(x = "Semester-Year", y = "Average Grade", colour = "Subject") + 
+  facet_wrap(~oer, labeller = labeller(oer = labels), scales = "free_x")
+```
+
+
+## Zoom in on those semester where there were both OER and traditional textbooks
+
+```{r avg grade pilot period, fig.width=5}
+avgGrade %>% 
+  filter(courseSubject == "HIST" & yrSem %in% pilotSems) %>% 
+  ggplot(aes(x = yrSem, y = mGrade, colour = factor(oer), group = factor(oer))) + geom_point() + geom_line()  + theme_min() + 
+  scale_colour_manual(values = osColorPalette, labels = c("Traditional Textbook", "Open Textbook")) + 
+  labs(x = "Semester Year", y = "Average Grade", colour = "Textbook Type") + 
+  geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade, colour = factor(oer)), width = .1) + scale_y_continuous(limits = c(0,4))
+```
+
+
+#### Political science: Recent adoption of OER
+
+```{r pol science}
+SLCC_11_18_proc %>% 
+  filter(courseSubject == "POLS" & oer == 1) %>% View()
+```
+
+```{r POLS pass rate zoomed in}
+passRate %>% 
+  filter(courseSubject == "POLS" & yrSem == "Sp 18") %>% 
+  ggplot(aes(x = yrSem, y = passRate, colour = factor(oer), group = factor(oer))) + geom_point() + geom_line()  + theme_min() + 
+  scale_colour_manual(values = osColorPalette, labels = c("Traditional Textbook", "Open Textbook")) + 
+  labs(x = "Semester Year", y = "Pass Rate", colour = "Textbook Type") + 
+  geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass, colour = factor(oer)), width = .1) + scale_y_continuous(limits = c(0,1))
+
+```
+
+
+
+```{r POLS avg grade zoomed in}
+avgGrade %>% 
+  filter(courseSubject == "POLS" & grepl("Sp", yrSem)) %>% 
+  group_by(oer) %>% 
+  summarise(meanGrade = mean(mGrade), meanSem = mean(semGrade)) %>% 
+  ggplot(aes(x = yrSem, y = meanGrade, colour = factor(oer), group = factor(oer))) + geom_point() + geom_line()  + theme_min() + 
+  scale_colour_manual(values = osColorPalette, labels = c("Traditional Textbook", "Open Textbook")) + 
+  labs(x = "Semester Year", y = "Average Grade", colour = "Textbook Type") + 
+  geom_errorbar(aes(ymin = meanGrade - meanSem, ymax = meanGrade + meanSem, colour = factor(oer)), width = .1) + scale_y_continuous(limits = c(0,4))
+
+```
+
+
+```{r OER vs Non OER}
+SLCC_11_18_proc %>% 
+  filter(courseSubject)
+```
+
+#### Do a propensity score match for POLS oer vs. non-oer
+
+
+Previous studies have been criticized for not controlling for instructor characteristics during study implementation and statistical analyses [@Griggs2017]. While it was not possible for us to control for the implementation of the open textbook adoption, we tackled instructor differences by including instructors as a random effect in our regression model.
+
+## Average Grade
+```{r avg Grade}
+
+```
+
+
+# Discussion
+
+
+\newpage
+
+# References
+```{r create_r-references}
+r_refs(file = "r-references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup

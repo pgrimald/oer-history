@@ -165,7 +165,7 @@ SLCCpersistenceProc %>%
   summarise(meanCourseGrade = mean(courseGrade, na.rm = TRUE), semCgrade = sd(courseGrade, na.rm = TRUE)/sqrt(sum(!is.na(courseGrade)))) %>% 
   arrange(courseSubject, yrSem) %>% 
   ggplot(aes(x = yrSem, y = meanCourseGrade, colour = courseSubject, fill = courseSubject, group = courseSubject)) + geom_line(lwd = 1, alpha = 0.75) + theme_min() +
-  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Academic Year", y = "Mean Course Grade", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Su 14')), lty = 2) + scale_y_continuous(limits = c(0,4))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
+  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Academic Year", y = "Mean Course Grade", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'F 16')), lty = 2) + scale_y_continuous(limits = c(0,4))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
   #geom_smooth(stat = "smooth", aes(fill = courseSubject))
 # + scale_x_date(labels = date_format("%m-%Y"), date_breaks = "8 months") 
 ```
@@ -177,7 +177,7 @@ SLCCpersistenceProc %>%
   #filter(dfw == 1) %>% View()
   summarise(dfwRate = sum(dfw == 1)/sum(!is.na(dfw)), ndfwRate = sum(dfw == 0)/sum(!is.na(dfw))) %>% 
   ggplot(aes(x = yrSem, y = dfwRate, colour = courseSubject, fill = courseSubject, group = courseSubject)) + geom_line(lwd = 1, alpha = 0.75) + theme_min() +
-  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "DFW Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Su 14')), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
+  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "DFW Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% c('Sp 16'))), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
   #geom_smooth(stat = "smooth", aes(fill = courseSubject))
 # + scale_x_date(labels = date_format("%m-%Y"), date_breaks = "8 months") 
 ```
@@ -188,7 +188,7 @@ SLCCpersistenceProc %>%
   #filter(dfw == 1) %>% View()
   summarise(dfwRate = sum(dfw == 1)/sum(!is.na(dfw)), ndfwRate = sum(dfw == 0)/sum(!is.na(dfw))) %>% 
   ggplot(aes(x = yrSem, y = ndfwRate, colour = courseSubject, fill = courseSubject, group = courseSubject)) + geom_line(lwd = 1, alpha = 0.75) + theme_min() +
-  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "Pass Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'Su 14')), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
+  scale_color_manual(values = osColorPalette[c(4,5,7)]) + labs(x = "Semester-Year", y = "Pass Rate", colour = "Subject") + scale_fill_manual(values = osColorPalette[c(4,5,7)]) + geom_vline(aes(xintercept = which(levels(yrSem) %in% 'F 16')), lty = 2) + scale_y_continuous(limits = c(0,1))#+ #geom_errorbar(aes(ymin = meanCourseGrade - semCgrade, ymax = meanCourseGrade + semCgrade)) 
   #geom_smooth(stat = "smooth", aes(fill = courseSubject))
 # + scale_x_date(labels = date_format("%m-%Y"), date_breaks = "8 months") 
 ```
@@ -252,6 +252,30 @@ In addition to a baseline model that only included the random effects, we comput
 * treatment variables (OER, semester since implementation)
 
 We compared the AIC values and selected the model with the lowest AIC value as our winning model. We also compared our winning model against our baseline model to ensure that these were significantly different.
+
+```{r passRate, cache=TRUE, include=FALSE}
+## Baseline model including only random effects
+passMod0Base_OER <- SLCCpersistenceProc %>% 
+    filter(termStartDate >= "2016-08-24") %>% 
+     glmer(pass ~ semester + (1|courseSubject/instructorId) + fullTime + cumUgGpa + everPellEligibleInd, data = ., family = binomial)
+
+passMod1_OER <- SLCCpersistenceProc %>% 
+    filter(termStartDate >= "2016-08-24") %>% 
+     glmer(pass ~ semester + (1|courseSubject/instructorId) + fullTime + cumUgGpa + everPellEligibleInd + oer, data = ., family = binomial)
+
+```
+
+```{r slcc}
+SLCCpersistenceProc %>% 
+    filter(termStartDate >= "2016-08-24") %>% 
+    add_count(courseSubject) %>% 
+    group_by(courseSubject, pass) %>% count() %>%
+    #add_count(courseSubject) %>%
+    summarise(passProp = sum(as.numeric(pass), na.rm = TRUE)) %>% View()
+```
+
+
+
 
 ```{r passRate, cache=TRUE, include=FALSE}
 ## Baseline model including only random effects
