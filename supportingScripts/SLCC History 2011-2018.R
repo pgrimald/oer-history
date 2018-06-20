@@ -13,11 +13,10 @@ get.package<- function(package){
 }
 
 ## packages required
-packages.needed <- c('tidyverse', 'rapportools', 'RColorBrewer', 'prophet','scales','sjPlot', 'optimx', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'captioner','knitr','extrafont', 'lubridate', 'lettercase') 
+packages.needed <- c('tidyverse', 'rapportools', 'RColorBrewer', 'lsmeans' ,'scales','sjPlot', 
+                     'optimx', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'captioner',
+                     'knitr','extrafont', 'lubridate', 'lettercase', 'effsize') 
 suppressMessages(sapply(packages.needed, get.package))
-
-## source ggplot template
-source('~/Documents/oer-history/supportingScripts/ggplot2theme_min.R')
 
 
 # Read in SLCC data -------------------------------------------------------
@@ -53,9 +52,10 @@ SLCC_11_18_proc <- SLCC_11_18 %>%
   left_join(SLCC_legend[ ,c("yrSem", "academicYear")], by = "yrSem") %>% 
   mutate(yrSem = factor(yrSem), courseGrade = as.numeric(Points), 
          termDuration = difftime(termEndDate, termStartDate, units = "days"),
-                                 pass = factor(if_else(roundedGrade <= "C",1,0)),
-                                 completion = factor(if_else(FINAL_GRADE == "I",0,1))) %>% 
-  select(-TERM_START_DATE,-TERM_END_DATE,-BIRTH_DATE, -INSTRUCTOR_PIDM, -PIDM, -Points) 
+         pass = factor(if_else(roundedGrade <= "C",1,0)),
+         completion = factor(if_else(FINAL_GRADE == "I",0,1)),
+         onlineInd = factor(if_else(ONLINE_IND == "Y", 1, 0))) %>% 
+  select(-TERM_START_DATE,-TERM_END_DATE,-BIRTH_DATE, -INSTRUCTOR_PIDM, -PIDM, -Points, -ONLINE_IND) 
 
 # Convert names to camel case --------------------------------------------- 
 
@@ -84,19 +84,20 @@ yrSemOrdered <- yrSemOrdered[-length(yrSemOrdered)]
 
 SLCC_11_18_proc$yrSem <- factor(SLCC_11_18_proc$yrSem, levels = yrSemOrdered)
 
-
 # Duplicate students ------------------------------------------------------
 
 # Some students appear more than once in the dataset
 # They could have taken more than one course, or the same course more than once, or both
 dupeIDs <- SLCC_11_18_proc %>% 
+  group_by(courseSubject) %>% 
   filter(duplicated(studentId)) %>% 
-  distinct(studentId) %>% 
-  unlist()
+  distinct(courseSubject, studentId) %>% 
+  mutate(rep = 1)
 
 # Add in a column to flag students who appear more than once in the dataset
+# The rep variable tell us which students took the same course more than once
 SLCC_11_18_proc <- SLCC_11_18_proc %>% 
-  mutate(rep = if_else(studentId %in% dupeIDs,1,0))
+  left_join(dupeIDs, by = c("studentId","courseSubject")) 
 
 # Check the course attributes column by year
 # SLCC_11_18_proc %>% 
@@ -145,13 +146,68 @@ instructorF15 <- instructorCourseCountF15  %>%
 # Add in OER field --------------------------------------------------------
 fullOERSems <- c("F 16", "Sp 17", "Su 17", "F 17", "Sp 18")
 SLCC_11_18_proc <- SLCC_11_18_proc %>% 
-  mutate(oer = if_else(courseSubject == "HIST" & yrSem == "Sp 16" & courseSection %in% oerPilotSections, 1,
+  mutate(oer = factor(if_else(courseSubject == "HIST" & yrSem == "Sp 16" & courseSection %in% oerPilotSections, 1,
                        if_else(courseSubject == "HIST" & yrSem == "F 15" & instructorId %in% instructorF15, 1, 
                                if_else(courseSubject == "HIST" & yrSem  %in% fullOERSems, 1, 
-                                       if_else(courseSubject == "POLS" & !is.na(courseAttributes), 1, 0)))))
+                                       if_else(courseSubject == "POLS" & !is.na(courseAttributes), 1, 0))))))
 
 
 
 # remove original dataset
 rm(SLCC_11_18)
+
+## Set up labels for plots
+subjLab <- c(HIST = "History", POLS = "Political Science", ECON = "Economics")
+oerLab <- c(`0` = "Traditional", `1` = "Open")
+onlineLab <- c(`0` = "Classroom", `1` = "Online")
+
+
+# Plot functions ----------------------------------------------------------
+## Linear trends -----------------------------------------------------------
+
+linearTrend <- function(df, v1 = "yrSem", v2 = "passRate", v3 = "oer", v4 = "courseSubject", v5 = "semPass", 
+                        labx = "Year-Semester", laby = "Pass Rate", colLab = "Textbook type", colVal = oerLab, 
+                        facetLab = subjLab, greyStart = .4, greyStop = .8, limy = c(0,1), legPos = "bottom", ltype = 2, 
+                        lwidth = .25, wEbar = .1, xtickfsz = 7, ytickfsz = 7){
+  # Create the upper and lower bounds for ebar plots
+  mutate_call1 <- lazyeval::interp(~ a + b, a = as.name(v2), b = as.name(v5))
+  mutate_call2 <- lazyeval::interp(~ a - b, a = as.name(v2), b = as.name(v5))
+  # Plot 
+  df %>%
+    mutate_(.dots = setNames(list(mutate_call1, mutate_call2), nm = c("uB", "lB"))) %>% 
+    ggplot(aes_string(x = v1, y = v2, color = v3, group = v3)) + 
+    geom_line() + geom_point() + 
+    geom_errorbar(aes_(ymin = ~lB, ymax = ~uB), width = wEbar) + 
+    scale_colour_grey(start = greyStart, end = greyStop, labels = colVal) + theme_minimal() + 
+    labs(x = labx, y = laby, colour = colLab) + scale_y_continuous(limits = limy) + 
+    theme(legend.position = legPos, axis.text.x = element_text(size = xtickfsz), axis.text.y = element_text(size = ytickfsz)) +
+    facet_wrap(v4) 
+}
+
+## Aggregated bar plots ----------------------------------------------------
+## x = yrSem, facet = courseSubject, fill = oer
+ 
+barPlotWEbar <- function(df, v1 = "semester", v2 = "passRate", v3 = "factor(oer)", v4 = "courseSubject", v5 = "semPass",
+                         labx = "Semester", laby = "Pass Rate", colLab = "Textbook type", colVal = oerLab,
+                         facetLab = subjLab, greyStart = .4, greyStop = .8, limy = c(0,1), legPos = "bottom",
+                         ltype = 2, lwidth = .25, wEbar = .1, colPos = "dodge"){
+  # Create the upper and lower bounds for ebar plots
+  mutate_call1 <- lazyeval::interp(~ a + b, a = as.name(v2), b = as.name(v5))
+  mutate_call2 <- lazyeval::interp(~ a - b, a = as.name(v2), b = as.name(v5))
+  df %>%
+    mutate_(.dots = setNames(list(mutate_call1, mutate_call2), nm = c("uB", "lB"))) %>%
+    ggplot(aes_string(x = v1, y = v2, fill = v3)) +
+    geom_col(position = colPos) +
+    geom_errorbar(aes_(ymin = ~lB, ymax = ~uB),
+                  width = wEbar, position = position_dodge(.9)) +
+    theme_minimal() +
+    scale_fill_grey(start = greyStart, end = greyStop, labels = colVal) +
+    labs(x = labx, y = laby, fill = colLab) +
+    theme(legend.position = legPos) +
+    facet_wrap(v4) +
+    scale_y_continuous(limits = limy)
+}
+
+## Aggregated line plots ---------------------------------------------------
+
 

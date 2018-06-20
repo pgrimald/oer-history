@@ -72,7 +72,7 @@ set.seed(42)
 source("~/Documents/oer-history/supportingScripts/SLCC History 2011-2018.R")
 ```
 
-
+** NOTES:MAKE OVERALL PLOT for pass rate and grade; lsmeans, do correlation plot**
 A major problem currently facing education in America is the rising cost of obtaining a college degree. Indeed, in 2016 student debt levels reached an all time high of 1.3 trillion dollars (Federal Reserve Bank of New York, 2016). While tuition hikes can account for a large portion of student costs, an additional source of cost increases come from rising textbook prices.  According to the U.S Bureau of Labor Statistics (2016), textbook costs have increased 134% from what they were in 2001. In fact, textbook prices are increasing at a faster rate than health care (U.S. Bureau of Labor Statistics, 2016).  According to the College Board (2016), students spend an average of $1280 on textbooks annually. In sum, textbooks represent a large chunk of the costs involved in obtaining a college degree, and the problem is only getting worse.   
 
 In response to rising textbook costs, there has been a surge of interest in open educational resources (OER). OER differs from traditional education materials in that they are freely available, and usually easily accessible online. The OER movement in education has not only impacted the US but has had a widespread global influence [@Farrow2015].
@@ -81,7 +81,13 @@ In response to rising textbook costs, there has been a surge of interest in open
 
 While OpenStax has been undoubtedly successful at reducing student costs, the critical question is whether these cost savings translate into improved student success. OER is presumed to help in this regard by improving access to beneficial learning materials, however research in this area is sparse. The overarching goal of this project is to explore how adoption of an OpenStax textbook affects student success, with special attention paid to low-income students.     
 
-Existing research suggests that high textbook costs have a negative impact on academic success. A recent survey found that an alarming proportion of students have dropped (27%) or withdrew (21%) from a course due to the cost of textbooks (Florida Virtual Campus, 2012). Worse, this same survey found that nearly 44% of students report that they earned a poor grade because they could not afford the textbook. We hypothesize that adopting a free OpenStax book will a) reduce dropped classes, b) reduce withdrawn classes, and c) improve final grades. 
+Existing research suggests that high textbook costs have a negative impact on academic success. A recent survey found that an alarming proportion of students have dropped (27%) or withdrew (21%) from a course due to the cost of textbooks (Florida Virtual Campus, 2012). Worse, this same survey found that nearly 44% of students report that they earned a poor grade because they could not afford the textbook. We hypothesize that adopting a free OpenStax book will a) increase course completion, b) increase pass rates, and c) improve final grades. 
+
+To address the issue of examining efficacy of OER in persistence of higher education, we collaborated with Salt Lake Community Collge who initiated adoption of OpenStax History in their require Introductory History course.
+
+#### Interaction between online courses and adoption of OER
+
+
 
 # Methods
 We report how we determined our sample size, all data exclusions (if any), all manipulations, and all measures in the study. <!-- 21-word solution (Simmons, Nelson & Simonsohn, 2012; retrieved from http://ssrn.com/abstract=2160588) -->
@@ -129,7 +135,6 @@ sCourseRep <- SLCC_11_18_proc %>%
   count() %>% 
   ungroup() %>% 
   count(nn)
-
 ```
 
 We had a total of `sCount` student records in the dataset. Out of these records, `r nrow(underAge)` students were less than 18 years of age when the term started and  were  therefore removed from further analyses. There were `r length(dupeIDs)` students who had more than one records in the dataset. These students may have either repeated a specific course, or taken courses in more than one course subjects included in this dataset, or both, resulting in an overall `r sum(duplicated(SLCC_11_18_proc$studentId), na.rm = TRUE)` additional records for these students. 
@@ -201,7 +206,7 @@ Out of the `r nrow(SLCC_11_18_proc)` student records, only `r sum(SLCC_11_18_pro
 # Completion is near ceiling
 completion <- SLCC_11_18_proc %>% 
   group_by(courseSubject) %>% 
-  summarize(completion = sum(finalGrade != "I"), n = n(studentId), completionrate = completion/n)
+  summarize(completion = sum(completion == 1), n = n(studentId), completionrate = completion/n)
 
 # Incomplete grades by course
 incomplete <- SLCC_11_18_proc %>% 
@@ -214,22 +219,45 @@ incomplete <- SLCC_11_18_proc %>%
 
 We defined a grade above or equal to "C-" as a passing grade. Overall, out of our `r nrow(SLCC_11_18_proc)` records, `r sum(as.numeric(SLCC_11_18_proc$pass))` records showed a passing grade. 
 
-```{r pass rate, fig.cap="", fig.width=15}
+```{r oer pass, fig.cap="Overall effect of OER on pass rates across different courses."}
+(passAggOer <- SLCC_11_18_proc %>% 
+  add_count(courseSubject, oer) %>% 
+  group_by(courseSubject, oer, n) %>% 
+  summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n)) %>% 
+  ggplot(aes(x = courseSubject, y = passRate, fill = oer)) + geom_col(position = "dodge") + 
+  geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass), width = .1, position = position_dodge(.9)) +
+  theme_minimal() + theme(legend.position = "bottom") + 
+  scale_fill_grey(start = .4, end = .8, labels = oerLab) + scale_y_continuous(limits = c(0,1)) +
+  labs(x = "Course Subject", fill = "Textbook Type", y = "Pass Rate"))
+```
+
+
+```{r pass rate aggregate plot, fig.cap="Pass rates across textbook types, semesters, subject."}
+passAgg <- SLCC_11_18_proc %>% 
+  add_count(courseSubject, oer, semester) %>% 
+  group_by(courseSubject, oer, semester, n) %>% 
+  summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n)) 
+
+(passAggPlot <- barPlotWEbar(df = passAgg, v2 = "passRate", v5 = "semPass", 
+                         laby = "Pass Rate", colLab = "Textbook type", limy = c(0,1)))
+```
+
+```{r pass rate, fig.cap="", fig.width=17, fig.height=5}
 passRate <- SLCC_11_18_proc %>% 
   add_count(courseSubject, oer, yrSem) %>% 
   ungroup() %>% 
   group_by(courseSubject, oer, yrSem, n) %>%
   summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n)) 
 
-(passLPlot <- passRate %>% 
-  ggplot(aes(x = yrSem, y = passRate, color= courseSubject, group = courseSubject)) + geom_line() + 
-  geom_point() + 
-  geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass), width =0.1) + 
-  scale_colour_grey(start = .4, end = .8) + theme_minimal() + 
-  labs(x = "Semester-Year", y = "Pass Rate") + facet_wrap(~oer, scales = "free_x", labeller = labeller(oer = labels)) + scale_y_continuous(limits = c(0,1)))
+(passLPlot <- linearTrend(df = passRate, v1 = "yrSem", v2 = "passRate", v3 = "oer", v4 = "courseSubject", v5 = "semPass", labx = "Year-Semester", laby = "Pass Rate") + 
+  geom_vline(aes(xintercept = which(levels(yrSem) %in% "F 15")), lty = 2, lwd = .25))
+
+# Effect size
+idx <- passRate$courseSubject == "HIST"
+dPassOER <- cohen.d(passRate$passRate[idx],passRate$oer[idx], na.rm = TRUE)
 ```
 
-```{r pass rate pilot period, fig.width=5}
+```{r pass rate pilot period, fig.cap="Difference in pass rate between courses using traditional and open textbooks over the pilot semesters."}
 # History was piloted during F15 and Sp 16
 pilotSems <- c("F 15", "Sp 16")
 # Change OER labels
@@ -237,31 +265,77 @@ labels <- c(`1` = "Used Open textbook", `0` = "Used Traditional Textbook")
 
 (histPassPlot <-passRate %>% 
   filter(courseSubject == "HIST" & yrSem %in% pilotSems) %>% 
-  ggplot(aes(x = yrSem, y = passRate, colour = factor(oer), group = factor(oer))) + geom_point() + geom_line()  + theme_minimal() + scale_colour_grey(start = .4, end = .8, labels = c("Traditional Textbook", "Open Textbook")) +
-  labs(x = "Semester Year", y = "Pass Rate", colour = "Textbook Type") + 
-  geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass, colour = factor(oer)), width = .1) + scale_y_continuous(limits = c(0,1)))
+  ggplot(aes(x = yrSem, y = passRate, colour = oer, group = oer)) + geom_point() + geom_line()  + theme_minimal() + scale_colour_grey(start = .4, end = .8, labels = c("Traditional Textbook", "Open Textbook")) +
+  labs(x = "Semester Year", y = "Pass Rate", colour = "Textbook Type") + theme(legend.position = "bottom") +
+  geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass, colour = oer), width = .1) + scale_y_continuous(limits = c(0,1)))
 ```
+
+
+```{r pass base model}
+passM0 <- SLCC_11_18_proc %>% 
+  glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + onlineInd, family = binomial, data=.)
+
+passM1 <- SLCC_11_18_proc %>% 
+  glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + onlineInd * oer, family = binomial, data=.)
+
+
+# Plot random effects
+sjp.glmer(passM1, type = "fe")
+
+# Find the least squares mean
+lsmeans(passM1, "oer")
+
+passComp <- anova(passM0, passM1)
+
+stargazer::stargazer(passM0, passM1, type = "text")
+```
+
 
 ## Average grade
 
-```{r avg grade, fig.width=10, fig.height=8}
+```{r oer pass, fig.cap="Overall effect of OER on average grade across different courses"}
+(gradeOer <- SLCC_11_18_proc %>% 
+  group_by(courseSubject, oer) %>% 
+  summarise(mGrade = mean(courseGrade, na.rm = TRUE), 
+            n = sum(!is.na(unique(studentId))),
+            semGrade = sd(courseGrade)/sqrt(n)) %>%  
+  ggplot(aes(x = courseSubject, y = mGrade, fill = oer)) + geom_col(position = "dodge") + 
+  geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade), width = .1, position = position_dodge(.9)) +
+  theme_minimal() + theme(legend.position = "bottom") + 
+  scale_fill_grey(start = .4, end = .8, labels = oerLab) + scale_y_continuous(limits = c(0,4)) +
+  labs(x = "Course Subject", fill = "Textbook Type", y = "Average Grade"))
+```
+
+```{r pass rate aggregate plot, fig.cap="Average grades across textbook types, semesters, subject."}
+avgGradeAgg <- SLCC_11_18_proc %>% 
+  group_by(courseSubject, oer, semester) %>%
+  summarise(mGrade = mean(courseGrade, na.rm = TRUE), 
+            n = sum(!is.na(unique(studentId))),
+            semGrade = sd(courseGrade)/sqrt(n)) 
+avgGradeAgg %>% 
+  ggplot(aes(x = semester, y = mGrade, fill = oer)) + geom_col(position = "dodge") + 
+  geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade), width = 0.1, position = position_dodge(.9)) + 
+  facet_wrap(~courseSubject, labeller = labeller(courseSubject = c(HIST = "History", POLS = "Political Science", ECON = "Economics"))) +
+  theme_minimal() +
+  scale_fill_grey(start = .4, end = .8, labels = c("Traditional", "Open")) +  
+  labs(x = "Semester", y = "Average Grade", fill = "Textbook Type") + theme(legend.position = "bottom")
+```
+
+
+```{r avg grade, fig.width=17, fig.height=5}
 avgGrade <- SLCC_11_18_proc %>% 
   group_by(courseSubject, oer, yrSem) %>%
   summarise(mGrade = mean(courseGrade, na.rm = TRUE), 
             n = sum(!is.na(unique(studentId))),
             semGrade = sd(courseGrade)/sqrt(n)) 
 
-# Plot the 
-(avgGradeLPlot <- avgGrade %>% 
-  ggplot(aes(x = yrSem, y = mGrade, color = courseSubject, group = courseSubject)) + 
-  geom_line() + 
-  geom_point() + 
-  theme_minimal() +
-  geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade), width = .2) + 
-  scale_colour_grey(start =.4, end = .8) +  scale_fill_grey(start = .4, end = .8) +
-  geom_ribbon(aes(x=yrSem, y=mGrade, ymax=mGrade + semGrade, ymin=mGrade - semGrade, fill = courseSubject), alpha=0.2, lwd = .02) +
-  labs(x = "Semester-Year", y = "Average Grade", colour = "Subject") + 
-  facet_wrap(~oer, labeller = labeller(oer = labels), scales = "free_x"))
+# Plot the linear trend
+(agLPlot <- linearTrend(df = avgGrade, v1 = "yrSem", v2 = "mGrade", v3 = "oer", v4 = "courseSubject", v5 = "semGrade", colVal = oerLab,labx = "Year-Semester", laby = "Average grade", limy = c(0,4)) +
+  geom_vline(aes(xintercept = which(levels(yrSem) %in% "F 15")), lty = 2, lwd = .25))
+
+# Effect size
+idx <- avgGrade$courseSubject == "HIST"
+dAvgGradeOER <- cohen.d(avgGrade$mGrade[idx],avgGrade$oer[idx], na.rm = TRUE)
 ```
 
 
@@ -270,11 +344,60 @@ avgGrade <- SLCC_11_18_proc %>%
 ```{r hist avg grade pilot period}
 (histAvgGrade <- avgGrade %>% 
   filter(courseSubject == "HIST" & yrSem %in% pilotSems) %>% 
-  ggplot(aes(x = yrSem, y = mGrade, colour = factor(oer), group = factor(oer))) + geom_point() + geom_line(lwd = 1)  + theme_minimal() + scale_colour_grey(start = .4, end = .8, labels = c("Traditional Textbook", "Open Textbook")) + 
+  ggplot(aes(x = yrSem, y = mGrade, colour = oer, group = oer)) + geom_point() + geom_line(lwd = 1)  + theme_minimal() + scale_colour_grey(start = .4, end = .8, labels = c("Traditional Textbook", "Open Textbook")) + 
   labs(x = "Semester Year", y = "Average Grade", colour = "Textbook Type") + 
-  geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade, colour = factor(oer)), width = .1) + scale_y_continuous(limits = c(0,4)))
+  geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade, colour = oer), width = .1) + scale_y_continuous(limits = c(0,4)))
 ```
 
+
+```{r avg grade base model}
+gradeM0 <- SLCC_11_18_proc %>% 
+  lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|yrSem) + (1|rep) + onlineInd, data=.)
+
+gradeM1 <- SLCC_11_18_proc %>% 
+  lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|yrSem) + (1|rep) + onlineInd * oer, data=.)
+
+gradeComp <- anova(gradeM0, gradeM1)
+
+stargazer::stargazer(gradeM0, gradeM1, type = "text")
+```
+
+### Online vs. Classroom
+
+```{r online/classroom and oer interaction}
+(passRateOnline <- SLCC_11_18_proc %>% 
+  add_count(courseSubject, oer, onlineInd, yrSem) %>% 
+  ungroup() %>% 
+  group_by(courseSubject, oer, onlineInd, yrSem, n) %>%
+  summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n)) %>% 
+  ggplot(aes(x = onlineInd, y = passRate, fill = oer)) +  
+  geom_col(position = "dodge") + theme_minimal() + 
+  facet_wrap(~courseSubject) + labs(x = "Course Type", y = "Pass Rate", fill = "Textbook Type") +
+  geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass, colour = oer), 
+                width = .2, position = position_dodge(0.9)) + scale_x_discrete(labels = c("Classroom", "Online")) +
+  scale_fill_grey(start = .4, end = .8, labels = c("Traditional", "Open")) + 
+  scale_color_grey(start = .4, end = .8) + theme(legend.position = "bottom") + guides(color = "none"))
+
+  
+```
+
+```{r online/classroom and oer interaction}
+(avgGradeOnline <- SLCC_11_18_proc %>% 
+  group_by(courseSubject, oer,onlineInd) %>%
+  summarise(mGrade = mean(courseGrade, na.rm = TRUE), 
+            n = sum(!is.na(unique(studentId))),
+            semGrade = sd(courseGrade)/sqrt(n)) %>% 
+  ggplot(aes(x = onlineInd, y = mGrade, fill = oer)) + 
+  geom_col(position = "dodge") + theme_minimal() + 
+  facet_wrap(~courseSubject) + labs(x = "Course Type", y = "Mean Grade", fill = "Textbook Type") +
+  geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade, colour = oer), 
+                width = .2, position = position_dodge(0.9)) + scale_x_discrete(labels = c("Traditional", "Online")) +
+  scale_fill_grey(start = .4, end = .8, labels = c("Traditional", "Open")) + 
+  scale_color_grey(start = .4, end = .8) + theme(legend.position = "bottom") + guides(color = "none"))
+```
+
+
+#### NEXT STEPS: lm with avg grade and pass rate, model with just history
 
 #### Political science: Recent adoption of OER
 
@@ -288,10 +411,10 @@ polsPassOer <- passRate %>%
   filter(courseSubject == "POLS" &  grepl("Sp", yrSem)) %>% 
   group_by(oer, yrSem) %>% 
   summarise(meanPassRate = mean(passRate), meanSemPass = mean(semPass)) %>% 
-  ggplot(aes(x = yrSem, y = meanPassRate, colour = factor(oer), group = factor(oer))) + geom_point() + geom_line()  + theme_minimal() + 
+  ggplot(aes(x = yrSem, y = meanPassRate, colour = oer, group = oer)) + geom_point() + geom_line()  + theme_minimal() + 
   scale_colour_grey(start = .4, end = .8, labels = c("Traditional Textbook", "Open Textbook")) + 
   labs(x = "Semester Year", y = "Pass Rate", colour = "Textbook Type") + 
-  geom_errorbar(aes(ymin = meanPassRate - meanSemPass, ymax = meanPassRate + meanSemPass, colour = factor(oer)), width = .1) + scale_y_continuous(limits = c(0,1)) + geom_hline(aes(yintercept = .$meanPassRate[.$oer == 1]), lty = 2, lwd = .5, alpha =.2)
+  geom_errorbar(aes(ymin = meanPassRate - meanSemPass, ymax = meanPassRate + meanSemPass, colour = oer), width = .1) + scale_y_continuous(limits = c(0,1)) + geom_hline(aes(yintercept = .$meanPassRate[.$oer == 1]), lty = 2, lwd = .5, alpha =.2)
 
 ```
 
@@ -302,10 +425,10 @@ polsAvgGradeOer <- avgGrade %>%
   filter(courseSubject == "POLS" & grepl("Sp", yrSem)) %>% 
   group_by(oer, yrSem) %>% 
   summarise(meanGrade = mean(mGrade), meanSem = mean(semGrade)) %>% 
-  ggplot(aes(x = yrSem, y = meanGrade, colour = factor(oer), group = factor(oer))) + geom_point() + geom_line()  + theme_minimal() + 
+  ggplot(aes(x = yrSem, y = meanGrade, colour = oer, group = oer)) + geom_point() + geom_line()  + theme_minimal() + 
   scale_colour_grey(start = .4, end = .8, labels = c("Traditional Textbook", "Open Textbook")) + 
   labs(x = "Semester Year", y = "Average Grade", colour = "Textbook Type") + 
-  geom_errorbar(aes(ymin = meanGrade - meanSem, ymax = meanGrade + meanSem, colour = factor(oer)), width = .1) + scale_y_continuous(limits = c(0,4))+ geom_hline(aes(yintercept = .$meanGrade[.$oer == 1]), lty = 2, lwd = .5, alpha =.2)
+  geom_errorbar(aes(ymin = meanGrade - meanSem, ymax = meanGrade + meanSem, colour = oer), width = .1) + scale_y_continuous(limits = c(0,4))+ geom_hline(aes(yintercept = .$meanGrade[.$oer == 1]), lty = 2, lwd = .5, alpha =.2)
 
 ```
 
@@ -324,6 +447,8 @@ Previous studies have been criticized for not controlling for instructor charact
 ```{r avg Grade}
 
 ```
+
+## Exploratory factor analysis to determine factors contributing to academic outcomes
 
 
 # Discussion
