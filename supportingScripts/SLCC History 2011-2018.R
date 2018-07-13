@@ -1,7 +1,5 @@
 ## Read in and preprocess SLCC dataset
 ## DBM, 06/14/17
-
-
 # Setup the necessary packages --------------------------------------------
 rm(list = ls())
 ## Get the necessary packages for the analyses
@@ -13,11 +11,10 @@ get.package<- function(package){
 }
 
 ## packages required
-packages.needed <- c('tidyverse', 'rapportools', 'RColorBrewer', 'lsmeans' ,'scales','sjPlot', 
+packages.needed <- c('tidyverse', 'rapportools', 'RColorBrewer', 'emmeans' ,'scales','sjPlot', 
                      'optimx', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'captioner',
                      'knitr','extrafont', 'lubridate', 'lettercase', 'effsize') 
 suppressMessages(sapply(packages.needed, get.package))
-
 
 # Read in SLCC data -------------------------------------------------------
 SLCC_11_18 <- read_excel('~/Box Sync/SLCC History/oer_data_update_201140-201820.xlsx')
@@ -82,7 +79,7 @@ names(SLCC_11_18_proc)[grepl("_", names(SLCC_11_18_proc))] <- lapply(names(SLCC_
 yrSemOrdered <- paste(rep(c("F", "Sp", "Su"), 7), c(11,rep(12:17, each = 3), 18))
 yrSemOrdered <- yrSemOrdered[-length(yrSemOrdered)]
 
-SLCC_11_18_proc$yrSem <- factor(SLCC_11_18_proc$yrSem, levels = yrSemOrdered)
+SLCC_11_18_proc$yrSem <- factor(SLCC_11_18_proc$yrSem, levels = yrSemOrdered, ordered = TRUE)
 
 # Duplicate students ------------------------------------------------------
 
@@ -99,6 +96,14 @@ dupeIDs <- SLCC_11_18_proc %>%
 SLCC_11_18_proc <- SLCC_11_18_proc %>% 
   left_join(dupeIDs, by = c("studentId","courseSubject")) 
 
+## Some students have taken a course more than once
+## Compute number of attempts
+SLCC_11_18_proc <- SLCC_11_18_proc %>% 
+  arrange(studentId) %>% 
+  group_by(rep, courseSubject, studentId) %>% 
+  mutate(numAttempts = if_else(rep == 1, order(yrSem) - 1, 0)) 
+
+
 # Check the course attributes column by year
 # SLCC_11_18_proc %>% 
 #   group_by(courseAttributes) %>% 
@@ -111,103 +116,107 @@ oerPilotSections <- paste0("0", c(12,14,18,22,23, 28, 35,76))
 ## We know the course sections for the Sp 16 pilots
 ## Get instructor IDs from the sections
 instructorsSpring  <- SLCC_11_18_proc %>% 
-  filter(yrSem == "Sp 16" & courseSection %in% oerPilotSections) %>% 
+  filter(courseSubject == "HIST" & yrSem == "Sp 16" & courseSection %in% oerPilotSections) %>% 
+  ungroup() %>% 
   distinct(instructorId) %>% unlist()
 
 ## Look at how many courses were taught by each of these instructors
 instructorCourseCountSp16  <- SLCC_11_18_proc %>% 
-  filter(yrSem == "Sp 16" & courseSection %in% oerPilotSections) %>% 
+  filter(courseSubject == "HIST" & yrSem == "Sp 16" & courseSection %in% oerPilotSections) %>% 
   group_by(instructorId) %>% 
   summarise(secTaught = n_distinct(courseSection)) %>%  
   arrange(instructorId)
 
 
+
+# From an inspection of the F15 syllabi we found that there were 
+# no OER sections in Fall 15 -----------------------------------
 # Find whether the instructors who taught the pilot sections in Spring 2016, also taught Fall 2015 
 # 5/6 instructors for Sp 16 taught F15
-instructorFall <- SLCC_11_18_proc %>% 
-  filter(yrSem == "F 15" & instructorId %in% instructorsSpring) %>% 
-  distinct(instructorId) %>% 
-  unlist()
+# instructorFall <- SLCC_11_18_proc %>% 
+#   filter(courseSubject == "HIST" & yrSem == "F 15" & instructorId %in% instructorsSpring) %>% 
+#   ungroup() %>% 
+#   distinct(instructorId) %>% 
+#   unlist()
 
 ## Found how many sections were taught by these instructors
 ## One of the Pilot instructors in F15 also taught 4 sections in F15
 ## Instructors c(3763, 651843) taught 4 sections each in F15 and are likely to be the pilot instructors
-instructorCourseCountF15 <- SLCC_11_18_proc %>% 
-  filter(yrSem == "F 15" & instructorId %in% instructorsSpring) %>% 
-  group_by(instructorId) %>% 
-  summarise(secTaught = n_distinct(courseSection)) %>%  
-  arrange(instructorId) 
-
-instructorF15 <- instructorCourseCountF15  %>% 
-  filter(secTaught == 4) %>% 
-  select(instructorId) %>% 
-  unlist()
+# instructorCourseCountF15 <- SLCC_11_18_proc %>% 
+#   filter(courseSubject == "HIST" & yrSem == "F 15" & instructorId %in% instructorsSpring) %>% 
+#   group_by(instructorId) %>% 
+#   summarise(secTaught = n_distinct(courseSection)) %>%  
+#   arrange(instructorId) 
+# 
+# instructorF15 <- instructorCourseCountF15  %>% 
+#   filter(secTaught == 4) %>% 
+#   select(instructorId) %>% 
+#   unlist()
 
 # Add in OER field --------------------------------------------------------
 fullOERSems <- c("F 16", "Sp 17", "Su 17", "F 17", "Sp 18")
+# F15 has no oer sections
+## Reorder course subjects
 SLCC_11_18_proc <- SLCC_11_18_proc %>% 
-  mutate(oer = factor(if_else(courseSubject == "HIST" & yrSem == "Sp 16" & courseSection %in% oerPilotSections, 1,
-                       if_else(courseSubject == "HIST" & yrSem == "F 15" & instructorId %in% instructorF15, 1, 
-                               if_else(courseSubject == "HIST" & yrSem  %in% fullOERSems, 1, 
-                                       if_else(courseSubject == "POLS" & !is.na(courseAttributes), 1, 0))))))
+  ungroup() %>% 
+  mutate(oer = factor(if_else(courseSubject == "HIST" & yrSem == "Sp 16" & courseSection %in% oerPilotSections, "OER",
+                       #if_else(courseSubject == "HIST" & yrSem == "F 15" & instructorId %in% instructorF15, 1, 
+                               if_else(courseSubject == "HIST" & yrSem  %in% fullOERSems, "OER", 
+                                       if_else(courseSubject == "POLS" & !is.na(courseAttributes), "OER", "No OER")))),
+         courseSubject = if_else(courseSubject == "HIST", "History", 
+                                 if_else(courseSubject == "POLS", "Political Science", "Economics")),
+         courseSubject = factor(courseSubject, levels = c("Economics", "Political Science", "History")))
 
 
+# Plot to check oer and number of students
+# SLCC_11_18_proc %>%
+#   ggplot(aes(x = yrSem, y = oer)) + geom_count(alpha = .2) +
+#   theme_minimal() + facet_wrap(~courseSubject)
 
 # remove original dataset
 rm(SLCC_11_18)
 
-## Set up labels for plots
-subjLab <- c(HIST = "History", POLS = "Political Science", ECON = "Economics")
-oerLab <- c(`0` = "Traditional", `1` = "Open")
-onlineLab <- c(`0` = "Classroom", `1` = "Online")
+# Write out processed dataset
+# SLCC_11_18_proc %>% 
+#   write_csv("~/Box Sync/oer-history/SLCC History 2011 - 2018.csv")
+
+## POLS had OER starting from Spring 2018
+## Since we are focusing on History OER, we will take POLS out
+SLCC_11_18_proc <- SLCC_11_18_proc %>% 
+  filter(yrSem != "Sp 18")
 
 
-# Plot functions ----------------------------------------------------------
-## Linear trends -----------------------------------------------------------
 
-linearTrend <- function(df, v1 = "yrSem", v2 = "passRate", v3 = "oer", v4 = "courseSubject", v5 = "semPass", 
-                        labx = "Year-Semester", laby = "Pass Rate", colLab = "Textbook type", colVal = oerLab, 
-                        facetLab = subjLab, greyStart = .4, greyStop = .8, limy = c(0,1), legPos = "bottom", ltype = 2, 
-                        lwidth = .25, wEbar = .1, xtickfsz = 7, ytickfsz = 7){
-  # Create the upper and lower bounds for ebar plots
-  mutate_call1 <- lazyeval::interp(~ a + b, a = as.name(v2), b = as.name(v5))
-  mutate_call2 <- lazyeval::interp(~ a - b, a = as.name(v2), b = as.name(v5))
-  # Plot 
-  df %>%
-    mutate_(.dots = setNames(list(mutate_call1, mutate_call2), nm = c("uB", "lB"))) %>% 
-    ggplot(aes_string(x = v1, y = v2, color = v3, group = v3)) + 
-    geom_line() + geom_point() + 
-    geom_errorbar(aes_(ymin = ~lB, ymax = ~uB), width = wEbar) + 
-    scale_colour_grey(start = greyStart, end = greyStop, labels = colVal) + theme_minimal() + 
-    labs(x = labx, y = laby, colour = colLab) + scale_y_continuous(limits = limy) + 
-    theme(legend.position = legPos, axis.text.x = element_text(size = xtickfsz), axis.text.y = element_text(size = ytickfsz)) +
-    facet_wrap(v4) 
-}
+# Read in instructor info -------------------------------------------------
 
-## Aggregated bar plots ----------------------------------------------------
-## x = yrSem, facet = courseSubject, fill = oer
- 
-barPlotWEbar <- function(df, v1 = "semester", v2 = "passRate", v3 = "factor(oer)", v4 = "courseSubject", v5 = "semPass",
-                         labx = "Semester", laby = "Pass Rate", colLab = "Textbook type", colVal = oerLab,
-                         facetLab = subjLab, greyStart = .4, greyStop = .8, limy = c(0,1), legPos = "bottom",
-                         ltype = 2, lwidth = .25, wEbar = .1, colPos = "dodge"){
-  # Create the upper and lower bounds for ebar plots
-  mutate_call1 <- lazyeval::interp(~ a + b, a = as.name(v2), b = as.name(v5))
-  mutate_call2 <- lazyeval::interp(~ a - b, a = as.name(v2), b = as.name(v5))
-  df %>%
-    mutate_(.dots = setNames(list(mutate_call1, mutate_call2), nm = c("uB", "lB"))) %>%
-    ggplot(aes_string(x = v1, y = v2, fill = v3)) +
-    geom_col(position = colPos) +
-    geom_errorbar(aes_(ymin = ~lB, ymax = ~uB),
-                  width = wEbar, position = position_dodge(.9)) +
-    theme_minimal() +
-    scale_fill_grey(start = greyStart, end = greyStop, labels = colVal) +
-    labs(x = labx, y = laby, fill = colLab) +
-    theme(legend.position = legPos) +
-    facet_wrap(v4) +
-    scale_y_continuous(limits = limy)
-}
+# instructorInfo <- read_excel("~/Box Sync/oer-history/Copy of Openstax HIST Instructor Info.xlsx")
+# instructorInfo <- instructorInfo %>% 
+#   mutate(instructorNm =  trimws(tolower(paste0(INSTRUCTOR_FIRST_NAME, INSTRUCTOR_LAST_NAME))))
+# 
+# instructorInfo %>% 
+#   group_by(instructorNm, INSTRUCTOR_UID) %>% 
+#   count() %>% View()
 
-## Aggregated line plots ---------------------------------------------------
+# Student Counts ----------------------------------------------------------
+# count the number of distinct students
+sCount <- SLCC_11_18_proc %>% 
+  summarize(`unique students` = n_distinct(studentId)) %>% 
+  unlist()
 
+# Get count of underage students
+underAge <- SLCC_11_18_proc %>% 
+  filter(age<18)
 
+# Filter out underage students from main dataset
+SLCC_11_18_proc <- SLCC_11_18_proc %>% 
+  filter(age >= 18)
+
+# Check if stuents repeated a class or had taken more than one courses or both
+# sCourseRep <- SLCC_11_18_proc %>% 
+#   filter(rep == 1) %>% 
+#   group_by(studentId, courseSubject) %>% 
+#   count() %>% 
+#   group_by(studentId) %>% 
+#   count() %>% 
+#   ungroup() %>% 
+#   count(nn)
