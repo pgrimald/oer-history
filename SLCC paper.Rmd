@@ -275,56 +275,7 @@ avgGradeOnline
 
 #### NEXT STEPS: lm with avg grade and pass rate, model with just history
 
-#### Political science: Recent adoption of OER
 
-```{r pol science}
-#SLCC_11_18_proc %>% 
-#  filter(courseSubject == "POLS" & oer == 1) 
-```
-
-```{r POLS pass rate zoomed in, fig.cap="Mean pass rate for the Political Science Spring Semesters with and without OER."}
-(polsPassOer <- passRate %>% 
-  filter(courseSubject == "POLS" &  grepl("Sp", yrSem)) %>% 
-  group_by(oer, yrSem) %>% 
-  summarise(meanPassRate = mean(passRate), meanSemPass = mean(semPass)) %>% 
-  ggplot(aes(x = yrSem, y = meanPassRate, colour = oer, group = oer)) + geom_point() + geom_line()  + theme_minimal() + 
-  scale_colour_grey(start = .4, end = .8, labels = c("Traditional Textbook", "Open Textbook")) + 
-  labs(x = "Semester Year", y = "Pass Rate", colour = "Textbook Type") + 
-  geom_errorbar(aes(ymin = meanPassRate - meanSemPass, ymax = meanPassRate + meanSemPass, colour = oer), width = .1) + scale_y_continuous(limits = c(0,1)) + geom_hline(aes(yintercept = .$meanPassRate[.$oer == 1]), lty = 2, lwd = .5, alpha =.2))
-
-```
-
-
-
-```{r POLS avg grade zoomed in, fig.cap="Average grade for the Political Science Spring Semesters with and without OER."}
-polsAvgGradeOer <- avgGrade %>% 
-  filter(courseSubject == "POLS" & grepl("Sp", yrSem)) %>% 
-  group_by(oer, yrSem) %>% 
-  summarise(meanGrade = mean(mGrade), meanSem = mean(semGrade)) %>% 
-  ggplot(aes(x = yrSem, y = meanGrade, colour = oer, group = oer)) + geom_point() + geom_line()  + theme_minimal() + 
-  scale_colour_grey(start = .4, end = .8, labels = c("Traditional Textbook", "Open Textbook")) + 
-  labs(x = "Semester Year", y = "Average Grade", colour = "Textbook Type") + 
-  geom_errorbar(aes(ymin = meanGrade - meanSem, ymax = meanGrade + meanSem, colour = oer), width = .1) + scale_y_continuous(limits = c(0,4))+ geom_hline(aes(yintercept = .$meanGrade[.$oer == 1]), lty = 2, lwd = .5, alpha =.2)
-
-```
-
-
-```{r OER vs Non OER, include=FALSE, eval=FALSE}
-SLCC_11_18_proc %>% 
-  filter(courseSubject)
-```
-
-#### Do a propensity score match for POLS oer vs. non-oer
-
-
-Previous studies have been criticized for not controlling for instructor characteristics during study implementation and statistical analyses [@Griggs2017]. While it was not possible for us to control for the implementation of the open textbook adoption, we tackled instructor differences by including instructors as a random effect in our regression model.
-
-## Average Grade
-```{r avg Grade}
-
-```
-
-## Exploratory factor analysis to determine factors contributing to academic outcomes
 
 
 # Discussion
