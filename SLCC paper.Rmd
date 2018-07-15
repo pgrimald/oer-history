@@ -77,7 +77,6 @@ SLCC_11_18_proc <- SLCC_11_18_proc  %>%
   ungroup()
 ```
 
-** NOTES:MAKE OVERALL PLOT for pass rate and grade; lsmeans, do correlation plot**
 The face of a typical American classroom is changing due to various socio-economic-technological factors. One of these factors is the rise in the cost of higher education in the United States. A glaring example of the the rise in the cost of higher ed in the US are the student debt levels reaching a staggering 1.3 billion dollars (Federal Reserve Bank of New York, 2016). While tuition hikes 
 
 A major problem currently facing education in America is the rising cost of obtaining a college degree. Indeed, in 2016 student debt levels reached an all time high of 1.3 trillion dollars (Federal Reserve Bank of New York, 2016). While tuition hikes can account for a large portion of student costs, an additional source of cost increases come from rising textbook prices.  According to the U.S Bureau of Labor Statistics (2016), textbook costs have increased 134% from what they were in 2001. In fact, textbook prices are increasing at a faster rate than health care (U.S. Bureau of Labor Statistics, 2016).  According to the College Board (2016), students spend an average of $1280 on textbooks annually. In sum, textbooks represent a large chunk of the costs involved in obtaining a college degree, and the problem is only getting worse.   
@@ -190,7 +189,7 @@ stargazer::stargazer(passM0, passM1, type = "text")
 
 ## Average grade
 
-```{r grade line yrsem, fig.cap = "Average grade across academic semesters for each subject."}
+```{r grade line yrsem, fig.cap = "Average grade across academic semesters for each subject.", fig.width=12}
 agLPlot
 ```
 
@@ -204,63 +203,10 @@ avgGradeAggPlt
 agLPlot
 ```
 
-## Zoom in on those semester where there were both OER and traditional textbooks
-
-```{r hist avg grade pilot period}
-histAvgGrade
-```
-
-```{r grade base model}
-```
-
 ```{r pass treatment model}
 stargazer::stargazer(gradeM0, gradeM1, type = "text")
 ```
 
-```{r grade interactive model}
-# Interactive treatment model
-gradeM2 <- SLCC_11_18_proc %>% 
-  glmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + everPellEligibleInd + fullTime + firstGenerationInd + cumUgGpa + onlineInd * oer, family = binomial, 
-        control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
-     optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data=.)
-
-summary(courseGradeM2)
-
-# Anova
-gradeAnova2 <- anova(gradeM2)
-
-gradeM2means <- emmeans(gradeM2, ~ oer * onlineInd)
-emmip(gradeM2, onlineInd ~ oer)
-# Plot random effects
-gradeM2RE <- sjp.glmer(gradeM2, type = "re") + theme_minimal()
-```
-
-```{r grade model comparison}
-AIC(gradeM0, passM1, passM2)
-anova(passM1, passM2)
-```
-
-
-
-```{r grade treatment model}
-# treatment model
-gradeM1 <- SLCC_11_18_proc %>% 
-  glmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + onlineInd * oer, family = binomial, data=.)
-
-# Find the least squares mean
-gradePmmeans <- pmmeans(gradeM1, ~oer * onlineInd)
-
-# Anova
-gradeAnova <- anova(gradeM1)
-
-# Model comparison
-passComp <- anova(gradeM0, gradeM1)
-
-# Plot random effects
-gradeRE <- sjp.glmer(gradeM1, type = "re")
-
-stargazer::stargazer(gradeM0, gradeM1, type = "text")
-```
 
 ### Online vs. Classroom
 
@@ -274,8 +220,6 @@ avgGradeOnline
 
 
 #### NEXT STEPS: lm with avg grade and pass rate, model with just history
-
-
 
 
 # Discussion

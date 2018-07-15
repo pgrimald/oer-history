@@ -163,9 +163,10 @@ SLCC_11_18_proc <- SLCC_11_18_proc %>%
                        #if_else(courseSubject == "HIST" & yrSem == "F 15" & instructorId %in% instructorF15, 1, 
                                if_else(courseSubject == "HIST" & yrSem  %in% fullOERSems, "OER", 
                                        if_else(courseSubject == "POLS" & !is.na(courseAttributes), "OER", "No OER")))),
+         `Textbook Type` = factor(if_else(oer == "OER", "Open", "Traditional"), levels = c("Traditional", "Open")),
          courseSubject = if_else(courseSubject == "HIST", "History", 
                                  if_else(courseSubject == "POLS", "Political Science", "Economics")),
-         courseSubject = factor(courseSubject, levels = c("Economics", "Political Science", "History")))
+         courseSubject = factor(courseSubject, levels = c("History", "Economics", "Political Science")))
 
 
 # Plot to check oer and number of students

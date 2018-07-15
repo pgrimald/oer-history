@@ -19,9 +19,13 @@ ethnicityCount <- SLCC_11_18_proc %>%
 
 # Ethnicity Pass
 ethnicityPass <- SLCC_11_18_proc %>% 
-  distinct(studentId, .keep_all = TRUE) %>% 
-  group_by(ethnicity, pass, oer, courseSubject) %>% 
-  count() 
+#  distinct(studentId, .keep_all = TRUE) %>% 
+  add_count(ethnicity, `Textbook Type`, courseSubject) %>% 
+  group_by(ethnicity, `Textbook Type`, courseSubject, n) %>% 
+  summarise(numPass = sum(pass == 1), 
+            passRate = numPass/unique(n))
+            # sdPass = sd(passRate, na.rm = TRUE),
+            # semPass = sdPass/sqrt(unique(n))) %>% View()
 
 # Ethnicity Grade
 ethnicityAvgGrade <- SLCC_11_18_proc %>% 
@@ -34,10 +38,21 @@ ethnicityAvgGrade <- SLCC_11_18_proc %>%
 ### Plot
 
 #### Pass (this plot is particularly uninformative)
+ethnicitypass <- ethnicityPass %>% 
+  ggplot(aes(x = reorder(ethnicity, passRate), y = passRate, fill = `Textbook Type`)) + 
+  geom_col(position = "dodge") +
+  facet_wrap(~courseSubject) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  scale_fill_grey(start = .4, end = .8, na.value = "blue") +
+  labs(x = "Ethnicity", y = "Pass rate", fill = "Textbook Type") +
+  # geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade), 
+  #               width = .1, position = position_dodge(.9)) +
+  coord_flip()
 
 #### Avg Grade
 ethnicityAvgGradePlt <- ethnicityAvgGrade %>% 
-  ggplot(aes(x = reorder(ethnicity, -mGrade), y = mGrade, fill = oer)) + 
+  ggplot(aes(x = reorder(ethnicity, mGrade), y = mGrade, fill = oer)) + 
   geom_col(position = "dodge") +
   facet_wrap(~courseSubject) +
   theme_minimal() +
@@ -63,12 +78,12 @@ gender <- SLCC_11_18_proc %>%
 
 pellStatusPass <- SLCC_11_18_proc %>% 
   distinct(studentId, .keep_all = TRUE) %>% 
-  group_by(everPellEligibleInd, pass, oer, courseSubject) %>% 
+  group_by(everPellEligibleInd, pass, `Textbook Type`, courseSubject) %>% 
   count() 
 
 pellStatusAvgGrade <- SLCC_11_18_proc %>% 
   distinct(studentId, .keep_all = TRUE) %>% 
-  group_by(everPellEligibleInd, oer, courseSubject) %>% 
+  group_by(everPellEligibleInd, `Textbook Type`, courseSubject) %>% 
   summarise(mGrade = mean(courseGrade, na.rm = TRUE),
             n = sum(!is.na(unique(studentId))),
             semGrade = sd(courseGrade)/sqrt(n))
@@ -79,14 +94,14 @@ pellStatusAvgGrade <- SLCC_11_18_proc %>%
 
 #### Avg Grade
 (pellStatusAvgGradeBarPlt <- pellStatusAvgGrade %>% 
-  ggplot(aes(x = reorder(everPellEligibleInd, -mGrade), y = mGrade, fill = oer)) + 
+  ggplot(aes(x = reorder(everPellEligibleInd, -mGrade), y = mGrade, fill = `Textbook Type`)) + 
   geom_col(position = "dodge") +
   facet_wrap(~courseSubject) +
   theme_minimal() +
   theme(legend.position = "bottom") + 
   scale_fill_grey(start = .4, end = .7, na.value = "blue") +
-  labs(x = "Pell Status", y = "Mean Grade", fill = "OER") +
-  geom_errorbar(aes(col = oer, ymin = mGrade - semGrade, ymax = mGrade + semGrade), 
+  labs(x = "Pell Status", y = "Mean Grade", fill = "Textbook type") +
+  geom_errorbar(aes(col = `Textbook Type`, ymin = mGrade - semGrade, ymax = mGrade + semGrade), 
                 width = .1, position = position_dodge(.9)) +
   scale_color_grey(start = .4, end = .7, na.value = "blue") +  
   scale_y_continuous(limits = c(0,4)) +
@@ -209,12 +224,20 @@ firstGenAvgGrade <- SLCC_11_18_proc %>%
 ### Prior Performance x Course Subject x OER ----------------------------------------
 
 ### Cumulative UG GPA
-gpaAvgGrade <- SLCC_11_18_proc %>% 
-  distinct(studentId, .keep_all = TRUE) %>% 
-  group_by(cumUgGpa, oer, courseSubject) %>% 
-  summarise(mGrade = mean(courseGrade, na.rm = TRUE),
-            n = sum(!is.na(unique(studentId))),
-            semGrade = sd(courseGrade)/sqrt(n))
+(gpaAvgGrade <- SLCC_11_18_proc %>%
+  distinct(studentId, .keep_all = TRUE) %>%
+  filter(!is.na(cumUgGpa)) %>% 
+  #group_by(cumUgGpa, oer, courseSubject) %>%
+  ggplot(aes(x = cumUgGpa, y = courseGrade, colour = `Textbook Type`)) + 
+  geom_point(alpha = .5) + scale_colour_grey(start = .4, end = .8) + 
+  theme_minimal() + facet_wrap(~courseSubject+`Textbook Type`) + theme(legend.position = "bottom") +
+  labs(x = "Cumulative undergraduate GPA (rounded)", y = "Course Grade"))
+  
+# summarise(mGrade = mean(courseGrade, na.rm = TRUE),
+#             n = sum(!is.na(unique(studentId))),
+#             semGrade = sd(courseGrade)/sqrt(n))
+
+
 
 # Course Factors ----------------------------------------------------------
 
@@ -260,22 +283,24 @@ onlineAvgGrade <- SLCC_11_18_proc %>%
 (passAggOer <- SLCC_11_18_proc %>% 
    add_count(courseSubject, oer) %>% 
    group_by(courseSubject, oer, n) %>% 
-   summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n)) %>% 
+   summarise(numPass = sum(pass == 1), passRate = numPass/unique(n)) %>% 
+   #mutate(semPass = sd(passRate)/sqrt(unique(n))) %>% 
    ggplot(aes(x = courseSubject, y = passRate, fill = oer)) + geom_col(position = "dodge") + 
-   geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass), width = .1, position = position_dodge(.9)) +
-   theme_minimal() + theme(legend.position = "bottom") + 
+   #geom_errorbar(aes(col = oer, ymin = passRate - semPass, ymax = passRate + semPass), width = .1, position = position_dodge(.9)) +
+   theme_minimal() + theme(legend.position = "bottom") + guides(color = "none") +
+   scale_color_grey(start = .4, end = .8) +
    scale_fill_grey(start = .4, end = .8, labels = oerLab) + scale_y_continuous(limits = c(0,1)) +
    labs(x = "Course Subject", fill = "Textbook Type", y = "Pass Rate"))
 
 # Sem x Pass
-passAggSem <- SLCC_11_18_proc %>% 
-  add_count(courseSubject, oer, semester) %>% 
-  group_by(courseSubject, oer, semester, n) %>% 
-  summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n)) 
-
-(passAggSemPlot <- barPlotWEbar(df = passAggSem, v2 = "passRate", v5 = "semPass", 
-                             laby = "Pass Rate", colLab = "Textbook type", limy = c(0,1)))
-
+# passAggSem <- SLCC_11_18_proc %>% 
+#   add_count(courseSubject, oer, semester) %>% 
+#   group_by(courseSubject, oer, semester, n) %>% 
+#   summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n)) 
+# 
+# (passAggSemPlot <- barPlotWEbar(df = passAggSem, v2 = "passRate", v5 = "semPass", 
+#                              laby = "Pass Rate", colLab = "Textbook type", limy = c(0,1)))
+# 
 
 # Grade x Subject
 # pass rate aggregate plot, fig.cap="Average grades across textbook types, semesters, subject."}
@@ -286,14 +311,16 @@ avgGradeAgg <- SLCC_11_18_proc %>%
             semGrade = sd(courseGrade)/sqrt(n)) 
 
 # Grade x Subject across semesters
-avgGradeAggPlt <- avgGradeAgg %>% 
+(avgGradeAggPlt <- avgGradeAgg %>% 
   ggplot(aes(x = semester, y = mGrade, fill = oer)) + geom_col(position = "dodge") + 
   geom_errorbar(aes(col = oer, ymin = mGrade - semGrade, ymax = mGrade + semGrade), width = 0.1, position = position_dodge(.9)) + 
   facet_wrap(~courseSubject) +
   theme_minimal() +
   scale_fill_grey(start = .4, end = .8, labels = c("Traditional", "Open")) +  
   scale_color_grey(start = .4, end = .8) +  guides(color = "none") +
-  labs(x = "Semester", y = "Average Grade", fill = "Textbook Type") + theme(legend.position = "bottom")
+  labs(x = "Semester", y = "Average Grade", fill = "Textbook Type") + theme(legend.position = "bottom") +  
+    geom_text(aes(label = paste0("n = ",n), y = 0.1), 
+              col = "white", fontface = "bold",lwd = 3.5, position = position_dodge(.9)))
 
 
 # Pilot period ------------------------------------------------------------
@@ -304,21 +331,21 @@ pilotSems <- "Sp 16" #c("F 15", "Sp 16")
 # Change OER labels
 labels <- c(`1` = "Used Open textbook", `0` = "Used Traditional Textbook")
 
-(histPilotPassPlot <- passRate %>% 
-    filter(courseSubject == "History" & yrSem %in% pilotSems) %>% 
-    ggplot(aes(x = oer, y = passRate, fill = oer)) + 
-    geom_col() + 
-    theme_minimal() + 
-    scale_x_discrete(labels = c("Traditional Textbook", "Open Textbook")) +
-    labs(y = "Pass Rate", x = "Textbook Type") + 
-    theme(legend.position = "bottom") +
-    geom_errorbar(aes(col = oer, ymin = passRate - semPass, ymax = passRate + semPass), position = position_dodge(0.9), width = .1) +
-    scale_fill_grey(start = .4, end = 0.8, na.value = "blue") +
-    scale_colour_grey(start = .4, end = 0.8, na.value = "blue") +
-    scale_y_continuous(limits = c(0,1)) + 
-    geom_text(aes(label = paste0("n = ",n), y = 0.1), 
-              col = "white", fontface = "bold",lwd = 3.5, position = position_dodge(.9)))
-
+# (histPilotPassPlot <- passRate %>% 
+#     filter(courseSubject == "History" & yrSem %in% pilotSems) %>% 
+#     ggplot(aes(x = oer, y = passRate, fill = oer)) + 
+#     geom_col() + 
+#     theme_minimal() + 
+#     scale_x_discrete(labels = c("Traditional Textbook", "Open Textbook")) +
+#     labs(y = "Pass Rate", x = "Textbook Type") + 
+#     theme(legend.position = "bottom") +
+#     geom_errorbar(aes(col = oer, ymin = passRate - semPass, ymax = passRate + semPass), position = position_dodge(0.9), width = .1) +
+#     scale_fill_grey(start = .4, end = 0.8, na.value = "blue") +
+#     scale_colour_grey(start = .4, end = 0.8, na.value = "blue") +
+#     scale_y_continuous(limits = c(0,1)) + 
+#     geom_text(aes(label = paste0("n = ",n), y = 0.1), 
+#               col = "white", fontface = "bold",lwd = 3.5, position = position_dodge(.9)))
+# 
 
 
 # Mode of course delivery: Online vs Classroom ----------------------------
@@ -327,20 +354,22 @@ passRateOnline <- SLCC_11_18_proc %>%
   add_count(courseSubject, oer, onlineInd) %>% 
   ungroup() %>% 
   group_by(courseSubject, oer, onlineInd, n) %>%
-  summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n))
+  summarise(numPass = sum(pass == 1), passRate = numPass/unique(n)) #, semPass = passRate/unique(n)
 
 passRateOnlinePlt <- passRateOnline %>% 
   ggplot(aes(x = onlineInd, y = passRate, fill = oer)) +  
   geom_col(position = "dodge") + theme_minimal() + 
   facet_wrap(~courseSubject) + 
   labs(x = "Course Type", y = "Pass Rate", fill = "Textbook Type") +
-  geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass, colour = oer), 
-                width = .1, position = position_dodge(0.9)) + 
+#  geom_errorbar(aes(ymin = passRate - semPass, ymax = passRate + semPass, colour = oer), 
+#                width = .1, position = position_dodge(0.9)) + 
   scale_y_continuous(limits = c(0,1)) +
   scale_x_discrete(labels = c("Classroom", "Online")) +
   scale_fill_grey(start = .4, end = .8, labels = c("Traditional", "Open")) + 
   scale_color_grey(start = .4, end = .8) + 
-  theme(legend.position = "bottom") + guides(color = "none")
+  theme(legend.position = "bottom") + guides(color = "none") +  
+  geom_text(aes(label = paste0("n = ",n), y = 0.1), 
+            col = "white", fontface = "bold",lwd = 3.5, position = position_dodge(.9))
 
 
 # Avg Grade
@@ -355,29 +384,31 @@ passRateOnlinePlt <- passRateOnline %>%
     geom_errorbar(aes(ymin = mGrade - semGrade, ymax = mGrade + semGrade, colour = oer), 
                   width = .2, position = position_dodge(0.9)) + 
     scale_y_continuous(limits = c(0,4)) +
-    scale_x_discrete(labels = c("Traditional", "Online")) +
+    scale_x_discrete(labels = c("Classroom", "Online")) +
     scale_fill_grey(start = .4, end = .8, labels = c("Traditional", "Open")) + 
-    scale_color_grey(start = .4, end = .8) + theme(legend.position = "bottom") + guides(color = "none"))
+    scale_color_grey(start = .4, end = .8) + theme(legend.position = "bottom") + guides(color = "none")+  
+    geom_text(aes(label = paste0("n = ",n), y = 0.1), 
+              col = "white", fontface = "bold",lwd = 3.5, position = position_dodge(.9)))
 
 
 # Year-Semester -----------------------------------------------------------
 
 ### Pass rate ---------------------------------------------------------------
-passRate <- SLCC_11_18_proc %>% 
-  add_count(courseSubject, oer, yrSem) %>% 
-  ungroup() %>% 
-  group_by(courseSubject, oer, yrSem, n) %>%
-  summarise(numPass = sum(pass == 1), passRate = numPass/unique(n), semPass = passRate/unique(n)) 
-
-
-
-# Effect size
-idx <- passRate$courseSubject == "History"
-dPassOER <- cohen.d(passRate$passRate[idx],passRate$oer[idx], na.rm = TRUE)
-
-## Pass plot
-passLPlot <- linearTrend(df = passRate, v1 = "yrSem", v2 = "passRate", v3 = "oer", v4 = "courseSubject", v5 = "semPass", labx = "Year-Semester", laby = "Pass Rate") + 
-    geom_vline(aes(xintercept = which(levels(yrSem) %in% "Sp 16")), lty = 2, lwd = .25)
+# passRateYrSem <- SLCC_11_18_proc %>% 
+#   add_count(courseSubject, oer, yrSem) %>% 
+#   ungroup() %>% 
+#   group_by(courseSubject, oer, yrSem, n) %>%
+#   summarise(numPass = sum(pass == 1), passRate = numPass/unique(n))  #, semPass = passRate/unique(n)
+# 
+# 
+# 
+# # Effect size
+# idx <- passRateYrSem$courseSubject == "History"
+# dPassOER <- cohen.d(passRateYrSem$passRate[idx],passRate$oer[idx], na.rm = TRUE)
+# 
+# ## Pass plot
+# passLPlot <- linearTrend(df = passRateYrSem, v1 = "yrSem", v2 = "passRate", v3 = "oer", v4 = "courseSubject", v5 = "semPass", labx = "Year-Semester", laby = "Pass Rate") + 
+#     geom_vline(aes(xintercept = which(levels(yrSem) %in% "Sp 16")), lty = 2, lwd = .25)
 
 
 ### Average Grade -----------------------------------------------------------
@@ -442,16 +473,14 @@ incomplete <- SLCC_11_18_proc %>%
 
 
 
-
-
-
-
 # Omnibus Models ------------------------------------------------------------------
 
 ## Pass Rate Logistic Models -----------------------------------------------
 ### Base Model
 passM0 <- SLCC_11_18_proc %>% 
-  glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + onlineInd + everPellEligibleInd + firstGenerationInd + fullTime + cumUgGpa, family = binomial, data=., 
+  glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
+          everPellEligibleInd + firstGenerationInd + fullTime + 
+          cumUgGpa + onlineInd, family = binomial, data=., 
         control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
                                optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
 summary(passM0)
@@ -461,15 +490,17 @@ emmip(passM0, ~onlineInd)
 
 ### Additive treatment model
 passM1 <- SLCC_11_18_proc %>% 
-  glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + onlineInd + everPellEligibleInd +  firstGenerationInd + fullTime + cumUgGpa + oer, family = binomial, data=., 
-        control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
+  glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
+          everPellEligibleInd +  firstGenerationInd + fullTime + 
+          cumUgGpa + onlineInd + `Textbook Type`, family = binomial, 
+        data=., control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
                                optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
 
 summary(passM1)
 
 # Find the least squares mean
-passPmmeans <- emmeans(passM1, ~oer)
-emmip(passM1, onlineInd ~ oer)
+passPmmeans <- emmeans(passM1, ~`Textbook Type`)
+emmip(passM1, onlineInd ~ `Textbook Type`)
 
 # Anova
 passAnova <- anova(passM1)
@@ -484,8 +515,9 @@ passM1RE <- sjp.glmer(passM1, type = "re") + theme_minimal()
 ### Interactive treatment model
 passM2 <- SLCC_11_18_proc %>% 
   glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
-        everPellEligibleInd + everPellEligibleInd:oer + fullTime + firstGenerationInd +
-        cumUgGpa + onlineInd + onlineInd:oer, family = binomial, 
+        everPellEligibleInd + firstGenerationInd + fullTime +
+        cumUgGpa + onlineInd + `Textbook Type` + 
+          oer:everPellEligibleInd + `Textbook Type`:onlineInd, family = binomial, 
         control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
                                optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data=.)
 
@@ -494,8 +526,8 @@ summary(passM2)
 # Anova
 passAnova2 <- anova(passM2)
 
-passM2means <- emmeans(passM2, ~ oer * onlineInd)
-emmip(passM2, onlineInd ~ oer)
+passM2means <- emmeans(passM2, ~ `Textbook Type` * everPellEligibleInd)
+emmip(passM2, everPellEligibleIndß ~ `Textbook Type`)
 # Plot random effects
 passM2RE <- sjp.glmer(passM2, type = "re") + theme_minimal()
 
@@ -510,8 +542,8 @@ anova(passM1, passM2)
 ### Base Model
 gradeM0 <- SLCC_11_18_proc %>% 
   lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
-          onlineInd + everPellEligibleInd + firstGenerationInd + fullTime + 
-          cumUgGpa, data=., control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
+          everPellEligibleInd + firstGenerationInd + fullTime + 
+          cumUgGpa + onlineInd, data=., control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
                                optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
 summary(gradeM0)
 emmeans(gradeM0, ~onlineInd)
@@ -522,26 +554,53 @@ emmip(gradeM0, ~onlineInd)
 ### Additive treatment model
 gradeM1 <- SLCC_11_18_proc %>% 
   lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
-         onlineInd + everPellEligibleInd +  firstGenerationInd + 
-         fullTime + cumUgGpa + oer, data=., control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
+         everPellEligibleInd +  firstGenerationInd + fullTime +
+         cumUgGpa + onlineInd + `Textbook Type`, data=., control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
                                optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
 
 
 summary(gradeM1)
 
 # Find the least squares mean
-gradepmM1 <- emmeans(gradeM1, ~oer)
-emmip(gradeM1, onlineInd ~ oer)
+gradepmM1 <- emmeans(gradeM1, ~`Textbook Type`)
+emmip(gradeM1, everPellEligibleInd ~ `Textbook Type`) + 
+  theme_minimal() + scale_color_grey(start = .4, end = .8)
 
 # Anova
 gradeAnova <- anova(gradeM1)
 
 
 # Model comparison
-passComp <- anova(gradeM0, gradeM1)
+gradeComp <- anova(gradeM0, gradeM1)
 
 # Plot random effects
 gradeM1RE <- sjp.glmer(gradeM1, type = "re") + theme_minimal()
+
+# grade interactive model
+# Interactive treatment model
+gradeM2 <- SLCC_11_18_proc %>% 
+  lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
+         everPellEligibleInd + firstGenerationInd + fullTime  + 
+         cumUgGpa + onlineInd + `Textbook Type` + `Textbook Type`:everPellEligibleInd + `Textbook Type`:onlineInd, 
+        control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
+                               optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data=.)
+
+summary(gradeM2)
+
+# Anova
+gradeAnova2 <- anova(gradeM2)
+
+gradeM2means <- emmeans(gradeM2, ~ `Textbook Type` * everPellEligible)
+emmip(gradeM2, onlineInd ~ `Textbook Type`)
+# Plot random effects
+gradeM2RE <- sjp.glmer(gradeM2, type = "re") + theme_minimal()
+
+
+# grade model comparison
+AIC(gradeM0, passM1, passM2)
+anova(gradeM1, gradeM2)
+
+
 
 # History Models ------------------------------------------------------------------
 
@@ -561,7 +620,8 @@ emmip(passHM0, ~onlineInd)
 
 ### Additive treatment model
 passHM1 <- history %>% 
-  glmer(pass ~ (1|instructorId) + (1|academicYear) + (1|semester) + onlineInd + everPellEligibleInd +  firstGenerationInd + fullTime + cumUgGpa + oer, family = binomial, data=., 
+  glmer(pass ~ (1|instructorId) + (1|academicYear) + (1|semester) + onlineInd + everPellEligibleInd + 
+        firstGenerationInd + fullTime + cumUgGpa + oer, family = binomial, data=., 
         control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
                                optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
 summary(passHM1)
@@ -571,65 +631,88 @@ passHPmmeans <- emmeans(passHM1, ~oer)
 emmip(passHM1, onlineInd ~ oer)
 
 # Anova
-passAnova <- anova(passM1)
+passAnova <- anova(passHM1)
 
 
 # Model comparison
-passComp <- anova(passM0, passM1)
+passHComp <- anova(passHM0, passHM1)
 
 # Plot random effects
-passM1RE <- sjp.glmer(passM1, type = "re") + theme_minimal()
+passHM1RE <- sjp.glmer(passHM1, type = "re") + theme_minimal()
 
 ### Interactive treatment model
-passM2 <- SLCC_11_18_proc %>% 
-  glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + oer*everPellEligibleInd + fullTime + 
-          firstGenerationInd + cumUgGpa + onlineInd, family = binomial, 
+passHM2 <- history %>% 
+  glmer(pass ~ (1|instructorId) + (1|academicYear) + (1|semester) + fullTime + everPellEligibleInd +
+          firstGenerationInd + cumUgGpa + oer + oer:everPellEligibleInd + oer:onlineInd, family = binomial, 
         control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
                                optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data=.)
 
-summary(passM2)
+summary(passHM2)
 
 # Anova
-passAnova2 <- anova(passM2)
+passHAnova2 <- anova(passHM2)
 
-passM2means <- emmeans(passM2, ~ oer * onlineInd)
+passHM2means <- emmeans(passHM2, ~ oer * everPellEligibleInd)
 emmip(passM2, onlineInd ~ oer)
 # Plot random effects
 passM2RE <- sjp.glmer(passM2, type = "re") + theme_minimal()
 
 ## Average Grade Models -----------------------------------------------
 ### Base Model
-gradeM0 <- SLCC_11_18_proc %>% 
-  lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
+gradeHM0 <- history %>% 
+  lmer(courseGrade ~ (1|instructorId) + (1|academicYear) + (1|semester) + 
          onlineInd + everPellEligibleInd + firstGenerationInd + fullTime + 
          cumUgGpa, data=., control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
                                                  optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
-summary(gradeM0)
-emmeans(gradeM0, ~onlineInd)
+summary(gradeHM0)
+emmeans(gradeHM0, ~onlineInd)
 
-emmip(gradeM0, ~onlineInd)
+emmip(gradeHM0, ~onlineInd)
 # ref_grid(passM0) @ grid %>% View()
 
 ### Additive treatment model
-gradeM1 <- SLCC_11_18_proc %>% 
-  lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
+gradeHM1 <- history %>% 
+  lmer(courseGrade ~ (1|instructorId) + (1|academicYear) + (1|semester) + 
          onlineInd + everPellEligibleInd +  firstGenerationInd + 
          fullTime + cumUgGpa + oer, data=., control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
                                                                   optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
 
 
-summary(gradeM1)
+summary(gradeHM1)
 
 # Find the least squares mean
-gradepmM1 <- emmeans(gradeM1, ~oer)
-emmip(gradeM1, onlineInd ~ oer)
+gradepmHM1 <- emmeans(gradeHM1, ~oer)
+emmip(gradeHM1, onlineInd ~ oer)
 
 # Anova
-gradeAnova <- anova(gradeM1)
+gradeHAnova <- anova(gradeHM1)
 
 
 # Model comparison
-passComp <- anova(gradeM0, gradeM1)
+gradeHComp <- anova(gradeHM0, gradeHM1)
 
 # Plot random effects
-gradeM1RE <- sjp.glmer(gradeM1, type = "re") + theme_minimal()
+gradeHM1RE <- sjp.glmer(gradeHM1, type = "re") + theme_minimal()
+
+# History grade interactive model
+# Interactive treatment model
+gradeHM2 <- history %>% 
+  lmer(courseGrade ~ (1|instructorId) + (1|academicYear) + (1|semester) + everPellEligibleInd + 
+         fullTime + firstGenerationInd + cumUgGpa + onlineInd + oer + oer:onlineInd + oer:everPellEligibleInd, 
+       control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
+                             optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data=.)
+
+summary(gradeHM2)
+
+# Anova
+gradeHAnova2 <- anova(gradeHM2)
+
+gradeHM2means <- emmeans(gradeHM2, ~ oer * everPellEligibleInd)
+emmip(gradeHM2, everPellEligibleInd ~ oer)
+# Plot random effects
+gradeHM2RE <- sjp.glmer(gradeHM2, type = "re") + theme_minimal()
+
+
+# grade model comparison
+AIC(gradeHM0, passHM1, passHM2)
+anova(passHM1, passHM2)
