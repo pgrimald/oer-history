@@ -12,7 +12,7 @@ get.package<- function(package){
 
 ## packages required
 packages.needed <- c('tidyverse', 'rapportools', 'RColorBrewer', 'emmeans' ,'scales','sjPlot', 
-                     'optimx', 'Rcpp','lme4', 'kableExtra','lmerTest','readxl', 'captioner',
+                     'optimx', 'Rcpp','lme4', 'kableExtra','lme4','readxl', 'captioner',
                      'knitr','extrafont', 'lubridate', 'lettercase', 'effsize') 
 suppressMessages(sapply(packages.needed, get.package))
 

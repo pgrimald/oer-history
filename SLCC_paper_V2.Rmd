@@ -1,0 +1,264 @@
+---
+title             : "Relation between OER adoption and persistence in higher education"
+shorttitle        : no
+
+author: 
+  - name          : "Debshila Basu Mallick"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "Postal address"
+    email         : "debshila@rice.edu"
+  - name          : "Phillip J. Grimaldi"
+    affiliation   : "1"
+  - name          : "Jason Whittle"
+    affiliation   : "2"
+  - name          : "Andrew J. Waters"
+    affiliation   : "1"
+  - name          : "Theodore Moore"
+    affiliation   : "2"
+  - name          : "Richard Baraniuk"
+    affiliation   : "1"
+
+affiliation:
+  - id            : "1"
+    institution   : "OpenStax, Rice University"
+  - id            : "2"
+    institution   : "Salt Lake Community College"
+
+author_note: |
+  Cognitive Science Postdoctoral Research Associate, OpenStax, Rice University.
+  Director of Research, OpenStax, Rice University.
+
+  # Enter author note here.
+
+abstract: |
+  A major problem currently facing education in America is the rising cost of obtaining a college degree. While tuition hikes predominate student costs, an additional source of expense is from textbook prices that have been found to rise at an alarming rate (134% increase since 2001; U.S. Bureau of Labor Statistics, 2016).
+
+  In response to rising textbook costs, there has been a surge of interest in open educational resources (OER). OER differs from traditional education materials in that they are freely available. While OER has undoubtedly been successful at reducing student costs, the critical question is whether these cost savings translate into improved student academic outcomes. OER is presumed to help in this regard by improving access to beneficial learning materials, however research in this area is has found equivocal results (Hilton, 2016). While some studies found that adoption of open textbooks resulted in positive academic outcomes (Lovett et al., 2008), others have found no effect (Hilton et al., 2013), or a negative effect (Lawrence & Lester, 2018). The overarching goal of this project is to explore how adoption of an open textbook affects student academic outcomes.
+
+  We examined the effect of transitioning from a conventional textbook to an open textbook for all sections of a required course at the Salt Lake Community College (SLCC). This was a unique opportunity to examine the impact of open textbook use because this large scale adoption was institutionally mandated, which implied that, unlike other situations where instructors generally opt in to adopt an open textbook for their own course, all instructors were required to use the same textbook for the course removing any concerns of self-selection bias. 
+
+  In collaboration with SLCC, we acquired student academic outcomes before and after transition to the open textbook, demographic, prior achievement, and other parameters related to the course. We attempted to ensure that any possible changes in the outcomes were primarily due to the open textbook adoption and not due to any temporal factors that naturally permeated across other comparable disciplines. In order to rule out other temporal confounds, we contrasted academic outcomes in the history course with other comparable disciplines, which continued to exclusively use traditional textbooks during the same period.
+
+  Preliminary results indicate that there was no positive effect of open textbook adoption on the number of students passing the course. Further analyses are underway, and the findings will be discussed in light of expectations surrounding OER efficacy, and integration of OER into a course curriculum.
+
+  
+keywords          : "OER, Open, Textbook, Persistence, Higher Education"
+wordcount         : "X"
+
+bibliography      : ["r-references.bib"]
+
+figsintext        : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : yes
+mask              : no
+fig.cap           : yes
+class             : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r load_packages, include = FALSE}
+library("papaja")
+```
+
+```{r analysis_preferences}
+# Seed for random number generation
+set.seed(42)
+```
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE, comment=""}
+# Source supporting files
+source("~/Documents/oer-history/supportingScripts/descriptives.R")
+```
+
+
+  A major problem currently facing education in America is the rising cost of obtaining a college degree. While tuition hikes predominate student costs, an additional source of expense is from textbook prices that have been found to rise at an alarming rate (134% increase since 2001; U.S. Bureau of Labor Statistics, 2016). Based on the Bureau of Labor statistics' estimates of average textbook costs up until May of 2018, college textbook prices have gone up by 43% since 2010 (BLS, 2018) without any seasonal adjustments. The Florida Virtual Campus survey (2016) of over 22,000 students reported that exorbitant textbook costs often determine students' academic decisions including whether they will purchase a textbook (67%), enroll in fewer class (~48%), drop (~26%) or withdraw (~21%) from a class, earn a poor grade because they were unable to buy a book (~38%).
+
+  In order to alleviate the financial burdens exerted on students by the high textbook costs, educators and institutions are more and more invested in In response to rising textbook costs, there has been a surge of interest in open educational resources (OER). OER differs from traditional education materials in that they are freely available. While OER has undoubtedly been successful at reducing student costs, the critical question is whether these cost savings translate into improved student academic outcomes. OER is presumed to help in this regard by improving access to beneficial learning materials, however research in this area is has found equivocal results (Hilton, 2016). 
+  
+  Previous studies have examined the impact of OER adoption on measures of academic outcomes such as a drop, failure, withdrawal rates [@Colvard2018; Hilton2016]. 
+  While some studies found that adoption of open textbooks resulted in positive academic outcomes (Colvard & Watson, 2018; Lovett et al., 2008), others have found no effect (Hilton et al., 2013), or a negative effect (Lawrence & Lester, 2018). The overarching goal of this project is to explore how adoption of an open textbook affects student academic outcomes.
+
+  We examined the effect of transitioning from a conventional textbook to an open textbook for all sections of a required introductory history course at the Salt Lake Community College (SLCC). This was a unique opportunity to examine the impact of open textbook use because this large scale adoption was institutionally mandated, which implied that, unlike other situations where instructors generally opt in to adopt an open textbook for their own course, all instructors were required to use the same textbook for the course removing any concerns of self-selection bias. In collaboration with SLCC, we acquired student academic outcomes before and after transition to the open textbook, demographic variables, prior achievement, and other parameters related to the course. In order to account for changes in academic outcomes due to open textbook adoption, we need to control for all other parameters that might impact the course outcome.
+  
+  Previous studies have shown that academic outcomes are influenced by the financial condition of the students as 
+  
+  In order to ensure that changes in the academic outcomes were primarily due to open textbook adoption and not other temporal confounds, we contrasted academic outcomes in the history course with other comparable social science disciplines, which continued to exclusively use traditional textbooks during the same period.
+
+  Preliminary results indicate that there was no positive effect of open textbook adoption on the number of students passing the course. Further analyses are underway, and the findings will be discussed in light of expectations surrounding OER efficacy, and integration of OER into a course curriculum.
+
+# Methods
+We report how we determined our sample size, all data exclusions (if any), all manipulations, and all measures in the study. <!-- 21-word solution (Simmons, Nelson & Simonsohn, 2012; retrieved from http://ssrn.com/abstract=2160588) -->
+
+## Participants
+
+We had a total of `sCount` student records in the dataset. Out of these records, `r nrow(underAge)` students were less than 18 years of age when the term started and  were  therefore removed from further analyses. There were `r length(dupeIDs)` students who had more than one records in the dataset. These students may have either repeated a specific course, or taken courses in more than one course subjects included in this dataset, or both, resulting in an overall `r sum(duplicated(SLCC_11_18_proc$studentId), na.rm = TRUE)` additional records for these students. 
+
+The dataset obtained from SLCC included `r n_distinct(SLCC_11_18_proc$studentId)` students (female =`r gender$n[1]`, male = `r gender$n[2]`, unreported = `r gender$n[3]`). Out of these students, `r pell$pell[pell$everPellEligibleInd == "Y"]`% were pell eligible, `r regStatus$enroll[regStatus$fullTime == "Full-Time"]`% were in full-time programs, and `r firstGen$firstgen[firstGen$firstGenerationInd == "Y"]`% identified as first generation students. 
+
+```{r participant table, results='asis'}
+# Create a participant table
+participantTable <- SLCC_11_18_proc %>% 
+  group_by(courseSubject, gender, everPellEligibleInd, 
+           firstGenerationInd, onlineInd, `Textbook Type`) %>% 
+  arrange(courseSubject, `Textbook Type`, onlineInd) %>% 
+  count() 
+
+# names(participantTable) <- c("Subject","Gender", "Pell Eligibility","First Generation College Student","Course Type","Textbook Type", "n")
+
+# participantTable %>% 
+#    apa_table(caption = "Student demographics and course details included in the SLCC dataset.") 
+
+# %>% 
+#   
+
+participantTable %>%
+    knitr::kable(format = "latex", linesep = "", valign = "t",
+                 col.names = c("Subject","Gender", "Pell Eligibility","First Generation College Student","Course Type","Textbook Type", "n"),
+                 caption = "Student demographics and course details included in the SLCC dataset.", booktabs = TRUE, align = c("r","l", rep("r", 2))) %>%
+    kable_styling(full_width = FALSE, font_size = 12) %>%
+    collapse_rows() %>% 
+  landscape()
+
+    # group_rows("Biology Control", start_row = 1,1) %>% 
+    # group_rows("Biology Tutor", start_row = 2,4) %>% 
+    # group_rows("Physics Control", start_row = 5,7) %>% 
+    # group_rows("Physics Tutor", start_row = 8,9) %>% 
+    # group_rows("Sociology Control", start_row = 10,13) %>% 
+    # group_rows("Sociology Tutor", start_row = 14,17)
+
+  #   kable(format = "latex", col.names = c("Subject","Gender", "Pell Eligibility","First Generation College Student","Course Type","Textbook Type", "n"), caption = "Student demographics and course details included in the SLCC dataset.", booktabs = TRUE) %>%
+  # kable_styling(full_width = FALSE, latex_options = "scale_down") %>%
+  # landscape()
+```
+
+
+## Procedure
+
+The authors collected and analyzed the following student records for the history course at SLCC from the period of Fall 2011, to Fall, 2017:   
+
+* _course metadata_ (e.g., instructor id, course number, section id, term start and end dates)       
+* _student demographics_ (e.g., ethnicity, gender, pell eligibility, enrolment status)        
+* _academic background_ (e.g., cumulative undergraduate GPA, prior achievement scores such as college placement test scores), and            
+* _course performance_ (e.g., final course grade, credits earned)           
+
+In addition, this dataset included the above parameters for 2 other Social Sciences subjects (Political Science, Economics) that exclusively used conventional textbooks. Using the data from 2 comparable subjects from the same discipline would allow us to tease apart any temporal fluctuations in student performance that would have occurred even without the use of open textbooks. 
+
+### History open textbook adoption
+
+Previous studies have failed to include the traditional and open textbooks used, and compare the difficulty of the traditional textbook and the oer content used [@Griggs2017]. While in this study we have not compared the difficulty of the traditional and the open textbooks, we did examine course syllabi in order to retrieve the name of the traditional textbook used, as well as the basic course structure before and after the adoption. Prior to the adoption of the history open textbook [@SLCCHist1], [@foner2013give] was the textbook adopted by a majority of the introductory history course sections. Coursework varied across instructors, and typically included an assortment of readings, impact papers, examinations (for e.g. 2-6 in class examinations, take home exams).
+
+## Data analysis
+We used `r cite_r("r-references.bib")` for all our analyses.
+
+
+# Results
+
+The primary goal of this project was to examine the impact of adopting an open textbook on academic outcomes of students. SLCC adopted an open textbook for their introductory history course. In order to examine the impact that open textbook adoption had on academic outcomes, not only did we compare the academic outcomes in history before and after the adoption, we also examined academic outcomes in other social sciences disciplines at SLCC, such as economics and political science. Examining academic outcomes in other social sciences disciplines during the same period of time allowed us to investigate whether there were any periodic changes across other social sciences disciplines in general that could not be attributed to adoption of an open textbook.
+
+We used course completion, pass rate, and average grade as indices of academic outcomes. Previous studies have often combined drop, failure, and withdrawals as a metric of academic outcome [@Colvard2018; ADD OTHER REFS]. However, we wanted to frame our research questions using parameters such as course completion, and pass rates separately so that we could examine if there were any differential impacts of open textbook adoption on these parameters. It is possible that having access to the textbook without any financial liability encourages students to complete the course. However, unless the quality of an open textbook is equal to or better than traditional textbooks, pass rates might suffer. Therefore, it allows us to make nuanced inferences than using a combined drop, failure, withdrawal metric. 
+
+Out of the `r nrow(SLCC_11_18_proc)` student records, all but `r sum(SLCC_11_18_proc$finalGrade == "I")` case completed their respective courses. Given the course completion values were at ceiling, we did not conduct any further analyses using course completion.
+
+We first examined the descriptives for passing, and average grade, across factors of interest followed by mixed effects hierarchical regression [@cohen2013applied] in order to estimate the impact of open textbook adoption on each outcome. This analysis is conducted by comparing two models:
+
+- a _base model_ that contains all relevant factors that might influence the outcome except for the variable of interest (textbook type)          
+- a _comparison model_ that includes the variable of interest in addition to all factors in the base model               
+
+If the comparison model significantly outperforms the base model, then we may safely conclude that the treatment had a consequential impact on the outcome.
+
+For examining pass rates, we conducted a logistic mixed effect hierarchical regression, in which the outcome variable was whether a single student passed (1, grade >= C-) or failed the course (0, grade < C-). The following _fixed effect_ predictor variables were included in the model:
+
+- demographic variables such as pell eligibility, whether the students were a first generation collge goer, whether the students were registered as full-time or part-time students,          
+- prior performance measure, the cumulative undergraduate GPA           
+- delivery method of the course, i.e., whether the course was delivered in a traditional classroom or online        
+In addition to the above fixed effect variables, the following _random effect_ variables were also included in the model:
+
+- academic year (Fall to Summer constituting one academic year)           
+- semester (Fall, Summer, Spring)                    
+- instructors nested under course subject                     
+
+
+```{r, include = FALSE, eval = FALSE}
+ethnicityAvgGradePlt
+```
+
+## Mean grade in social science subjects that used different textbook types (traditional vs. open) across students who were (Y) and were not (N) pell eligibility
+
+```{r pellPass, fig.width=9.5, fig.cap="Mean grade across students with differing Pell eligibility, subjects, and textbook type used. 'Y' denotes students were pell eligible, and 'N' denotes that they were not pell eligible. The error bars indicate the standard error of mean, and n indicates the number of students for each condition. Average grade is similar across pell status. However, mean grade is slightly lower for students using open textbooks."}
+pellStatusAvgGradeBarPlt
+```
+
+## Mean grade in social science subjects that used different textbook types (traditional vs. open) across full-time and part-time students 
+
+```{r regStatGrade, fig.width=9.5, fig.cap="Mean grade across students registered either as full-time or part-time students, subjects, and textbook type used. The error bars indicate the standard error of mean, and n indicates the number of students in each group. The mean grades are similar across registration status. However, mean grade is slightly lower for students using open textbooks."}
+regStatusAvgGradePlt
+```
+
+## Mean grade in social science subjects that used different textbook types (traditional vs. open) across students of different pell eligibility status 
+
+```{r firstgen, fig.width=12.5, fig.height=5, fig.cap="Mean grade across students with differing first  status, subjects, and textbook type used. The label 'N' along the horizontal axis denotes that students were not first generation college goers, 'U' denotes unknown, and 'Y' denotes first generation students. The error bars indicate the standard error of mean, and n indicates the number of students for each condition. Average grade is similar across registration status. However, mean grade is slightly lower for students using open textbooks."}
+firstGenAvgGradePlt
+```
+
+## Mean grade in social science subjects that used different textbook types (traditional vs. open) across classroom and online courses
+
+```{r onlineGrade, fig.width=9.5, fig.cap="Mean grade across students with differing first  status, subjects, and textbook type used. The error bars indicate the standard error of mean, and n indicates the number of students for each condition. Average grade is similar across registration status. However, mean grade is slightly lower for students using open textbooks."}
+avgGradeOnline
+```
+
+## Scatterplots showing grades in social science subjects that used different textbook types (traditional vs. open) across different cumulative undergraduate 
+
+
+```{r cumGPAGrade, fig.width=12, fig.cap="Course grade plotted as a function of cumulative undergraduate GPA, for each subject and textbook type. Each dot indicates a single student.", warning=FALSE, include=FALSE}
+gpaAvgGrade
+```
+
+## Passing a course as the outcome measure of interest
+
+We compared three logistic mixed effect models to examine the impact of open textbook adoption on students' passing courses (ref). We found that  
+
+```{r pass mod, results='asis', warning=FALSE}
+stargazer::stargazer(passM0, passM1, passM2, type = "text",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status", "Textbook Type x Course Type"), dep.var.labels = "Pass Status (0 = Fail, 1 = Pass)", ci = TRUE, title = "Model summary for all three subjects, with pass status as the outcome measure.",dep.var.caption = "", digits = 2, notes.align = "l", 
+          notes.label = "Note: 95\\% CI in parentheses")
+```
+ 
+
+```{r history pass mod, results='asis'}
+stargazer::stargazer(passHM0, passHM1, passHM2, type = "text",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status", "Textbook Type x Course Type"), dep.var.labels = "Pass Status (0 = Fail, 1 = Pass)", ci = TRUE, title = "Model summary for treatment subject, with pass status as the outcome measure.",dep.var.caption = "", digits = 2, notes.align = "l", 
+          notes.label = "Note: 95\\% CI in parentheses")
+```
+
+```{r grade mod, results='asis'}
+stargazer::stargazer(gradeM0, gradeM1, gradeM2, type = "text",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status"), dep.var.labels = "Course Grade", ci = TRUE, title = "Model summary for all three subjects, with course grade as the outcome measure.", dep.var.caption = "", digits = 2, notes.align = "l", 
+          notes.label = "Note: 95\\% CI in parentheses")
+```
+
+```{r history grade mod, results='asis'}
+stargazer::stargazer(gradeHM0, gradeHM1, gradeHM2, type = "latex",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status", "Textbook Type x Course Type"), dep.var.labels = "Course Grade", ci = TRUE, dep.var.caption = "", title = "Model summary for treatment subject.",notes.align = "l", 
+          notes.label = "Note: 95\\% CI in parentheses", digits = 2)
+```
+
+## Pass rate
+
+surmise that drops, withdrawals, and failures could be attributed to different causal factors. While drops and withdrawals may be attributed to factors such as textbook costs or other financial hardships, and course difficulty, failure could be attributed to additional factors such as not meeting course requirements (for e.g. class attendance, doing required assignments in a timely fashion), or not being able to keep up with course content. For our analyses, we decided to 
+
+
+# Discussion
+
+
+\newpage
+
+# References
+```{r create_r-references, warning=FALSE}
+r_refs(file = "r-references.bib")
+```
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id = "refs"></div>
+\endgroup

@@ -148,13 +148,20 @@ avgGradeOnline
 gpaAvgGrade
 ```
 
-```{r pass mod}
-stargazer::stargazer(passM0, passM1, passM2, type = "text",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status", "Textbook Type x Course Type"), dep.var.labels = "Mean Grade", ci = TRUE, dep.var.caption = " ", digits = 2)
+```{r pass mod, results='asis'}
+stargazer::stargazer(passM0, passM1, passM2, type = "latex",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status", "Textbook Type x Course Type"), dep.var.labels = "Mean Grade", ci = TRUE, dep.var.caption = " ", digits = 2)
 ```
 
+```{r history pass mod, results='asis'}
+stargazer::stargazer(passHM0, passHM1, passHM2, type = "latex",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status", "Textbook Type x Course Type"), dep.var.labels = "Mean Grade", ci = TRUE, dep.var.caption = " ", digits = 2)
+```
 
-```{r grade mod}
-stargazer::stargazer(gradeM0, gradeM1, gradeM2, type = "text",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status", "Textbook Type x Course Type"), dep.var.labels = "Mean Grade", ci = TRUE, dep.var.caption = " ", digits = 2)
+```{r grade mod, results='asis'}
+stargazer::stargazer(gradeM0, gradeM1, gradeM2, type = "latex",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status", "Textbook Type x Course Type"), dep.var.labels = "Mean Grade", ci = TRUE, dep.var.caption = " ", digits = 2)
+```
+
+```{r history grade mod, results='asis'}
+stargazer::stargazer(gradeHM0, gradeHM1, gradeHM2, type = "latex",covariate.labels = c("Pell Eligibility","First Generation Status Unknown","First Generation Status Yes","Registration Status","Cumulative Ungraduate GPA","Course Type","Textbook Type", "Textbook Type x Pell Status", "Textbook Type x Course Type"), dep.var.labels = "Mean Grade", ci = TRUE, dep.var.caption = " ", digits = 2)
 ```
 
 ## Pass rate

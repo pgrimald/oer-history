@@ -49,8 +49,8 @@ wordcount         : "X"
 bibliography      : ["r-references.bib"]
 
 figsintext        : no
-figurelist        : no
-tablelist         : no
+figurelist        : yes
+tablelist         : yes
 footnotelist      : no
 lineno            : yes
 mask              : no
@@ -203,7 +203,7 @@ avgGradeAggPlt
 agLPlot
 ```
 
-```{r pass treatment model}
+```{r grade treatment model}
 stargazer::stargazer(gradeM0, gradeM1, type = "text")
 ```
 
