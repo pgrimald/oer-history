@@ -17,10 +17,10 @@ packages.needed <- c('tidyverse', 'rapportools', 'RColorBrewer', 'emmeans' ,'sca
 suppressMessages(sapply(packages.needed, get.package))
 
 # Read in SLCC data -------------------------------------------------------
-SLCC_11_18 <- read_excel('~/Box Sync/SLCC History/oer_data_update_201140-201820.xlsx')
+SLCC_11_18 <- read_excel('~/Box Sync/oer-history/oer_data_update_201140-201820.xlsx')
 
 # Read in legend
-SLCC_legend <- read_csv('~/Box Sync/SLCC History/SLCC legend.csv')
+SLCC_legend <- read_csv('~/Box Sync/oer-history/SLCC legend.csv')
 
 # Preprocess dataset for modeling------------------------------------------------------
 ### Convert date fields to standardized format
@@ -166,7 +166,11 @@ SLCC_11_18_proc <- SLCC_11_18_proc %>%
          `Textbook Type` = factor(if_else(oer == "OER", "Open", "Traditional"), levels = c("Traditional", "Open")),
          courseSubject = if_else(courseSubject == "HIST", "History", 
                                  if_else(courseSubject == "POLS", "Political Science", "Economics")),
-         courseSubject = factor(courseSubject, levels = c("History", "Economics", "Political Science")))
+         courseSubject = factor(courseSubject, levels = c("History", "Economics", "Political Science")),
+         everPellEligibleInd = factor(if_else(everPellEligibleInd == "Y", "Pell Eligible", 
+                                              if_else(everPellEligibleInd == "N", "Non-Pell Eligible", "NA"))),
+         firstGenerationIndNA = as.numeric(if_else(firstGenerationInd == "U", "NA", 
+                                                   if_else(firstGenerationInd == "Y", "1", "0"))))
 
 
 # Plot to check oer and number of students
@@ -200,13 +204,13 @@ SLCC_11_18_proc <- SLCC_11_18_proc %>%
 
 # Student Counts ----------------------------------------------------------
 # count the number of distinct students
-sCount <- SLCC_11_18_proc %>% 
-  summarize(`unique students` = n_distinct(studentId)) %>% 
-  unlist()
+# sCount <- SLCC_11_18_proc %>% 
+#   summarize(`unique students` = n_distinct(studentId)) %>% 
+#   unlist()
 
 # Get count of underage students
-underAge <- SLCC_11_18_proc %>% 
-  filter(age<18)
+# underAge <- SLCC_11_18_proc %>% 
+#   filter(age<18)
 
 # Filter out underage students from main dataset
 SLCC_11_18_proc <- SLCC_11_18_proc %>% 

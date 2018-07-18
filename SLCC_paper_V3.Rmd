@@ -1,0 +1,118 @@
+---
+title: "Relation between OER adoption and persistence in higher education"
+output: pdf_document
+fontsize: 12
+---
+
+```{r globalOpts, echo=FALSE, warning=FALSE, message=FALSE, comment=""}
+knitr::opts_chunk$set(fig.width=8, fig.height=5, echo=FALSE, warning=FALSE, message=FALSE, fig.pos='center', cache=FALSE, progress=TRUE)
+```
+
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE, comment=""}
+# Source supporting files
+source("~/Documents/oer-history/supportingScripts/descriptives.R")
+```
+
+
+```{r f17 figTbl}
+figs <- captioner(prefix="Figure ", auto_space = FALSE) 
+tbls <- captioner(prefix="Table ", auto_space = FALSE)
+# to reference fig in text, use the following syntax: 
+# `r figs("Logic4", display = "cite")` #Where "Logic4" is the name of the chunk that produces the image
+# `r tbls("bioModels4",display = "cite")`
+
+#options, 3 digits, hide all warnings
+options(digits = 3, warn = -1, knitr.kable.NA = " ")
+```
+
+
+
+# Intro
+
+
+# Methods
+We report how we determined our sample size, all data exclusions (if any), all manipulations, and all measures in the study. <!-- 21-word solution (Simmons, Nelson & Simonsohn, 2012; retrieved from http://ssrn.com/abstract=2160588) -->
+
+We collected and analyzed the following student records for the history course at SLCC from the period of Fall 2011, to Fall, 2017:   
+
+* _course metadata_ (e.g., instructor id, course number, section id, term start and end dates)       
+* _student demographics_ (e.g., ethnicity, gender, pell eligibility, enrolment status)        
+* _academic background_ (e.g., cumulative undergraduate GPA, prior achievement scores such as college placement test scores), and            
+* _course performance_ (e.g., final course grade, credits earned)           
+
+In addition, this dataset included the above parameters for 2 other social sciences subjects (political science, economics) that exclusively used conventional textbooks during the same period of time. Using the data from 2 comparable subjects from the same discipline would allow us to tease apart any temporal fluctuations in student performance that would have occurred even without the use of open textbooks. 
+
+## Participants
+
+```{r participantTable}
+participantTable %>% 
+  knitr::kable(format = "latex", linesep = "", valign = "t", booktabs = TRUE, caption = "The number of student records (n) in each subject and textbook type, alongwith their pell eligibility status.", col.names = c("Pell Eligibility", "n"), align = c("l", "r")) %>% 
+  #collapse_rows() %>% 
+  kable_styling(full_width = FALSE, font_size = 12) %>% 
+  group_rows("History Open Textbook", start_row = 1, end_row = 2) %>% 
+  group_rows("History Traditional Textbook", start_row = 3, end_row = 4) %>% 
+  group_rows("Economics Traditional Textbook", start_row = 5, end_row = 6) %>% 
+  group_rows("Political Science Traditional Textbook", start_row = 7, end_row = 8)  
+```
+
+We examined the student records included in the dataset that we obtained from SLCC. After removing records of students who were less than 18 years of age at the time of the course, we had a total of `dim(SLCC_11_18_proc)[1]` student records in the dataset. We observed that there were `r n_distinct(SLCC_11_18_proc$studentId)` unique students in the data. Indeed, out of all the records, `r sum(duplicated(SLCC_11_18_proc$studentId))` records belonged to students who had either taken more than one of the social science courses in the dataset, or had taken a course more than once, or both. The student sample was comprised of `r gender$genderPerc[1]`% female, `r gender$n[2]`% male students, while `r gender$n[3]`% students had chosen not to report their gender. Out of these students, `r pell$pell[pell$everPellEligibleInd == "Y"]`% were pell eligible, `r regStatus$enroll[regStatus$fullTime == "Full-Time"]`% were in full-time programs, and `r firstGen$firstgen[firstGen$firstGenerationInd == "Y"]`% identified as first generation students. 
+
+## Procedure
+
+Studies of OER that have evaluated the impact of OER on academic outcomes[[ADD REF]], have been criticized for not including the information about the traditional and open textbooks used by the courses included in their studies [@Griggs2017]. We addressed this issue by retrieving the names of the textbooks from the relevant course syllabi. Prior to the adoption of the history open textbook [@SLCCHist1], [@foner2013give] was the textbook used introductory history courses. 
+
+We also inspected the basic course structure before and after the open textbook adoption. Coursework varied across instructors, and typically included an assortment of readings, impact papers, quizzes, and examinations (for e.g. 2-6 in class examinations, take home exams) before and after the open textbook adoption. 
+
+# Results
+
+The primary goal of this project was to examine the impact of using an open textbook on academic outcomes of students. To this end, we examined the introductory history course outcomes at SLCC which piloted an open textbook in Spring 2016, and adopted it across all sections by Fall 2016. We examined academic outcomes in history after controlling for demographic factors such as pell eligibility, registration status, prior achievement measure such as cumulative undergraduate GPA, course type (classroom vs. online). In addition, we also compared academic outcomes in introductory history with introductory courses in other social sciences disciplines at SLCC (economics and political science) that used conventional textbooks. Analyzing academic outcomes in these other social sciences disciplines during the same period of time allowed us to account for any periodic changes across social science disciplines that may have contributed to changes in academic outcomes.
+
+Previous studies have often combined drop, failure, and withdrawals as a metric of academic outcome [@Colvard2018; ADD OTHER REFS]. However, combining these measures into one, limits the ability to see any differential impact of OER on drops, withdrawals, or failure individually. In addition, these metrics are often derived from the course grade by categorizing the course grade by established standards, for e.g., any grade less than a 1.3 (< C-) is considered a failing grade. In order to draw more nuanced inferences, we used course grade as the primary outcome of interest. While we also examined completion rates of courses, we found that all but `r sum(SLCC_11_18_proc$finalGrade == "I")` student completed their respective courses. Given that the courses were all required courses, students were likely to complete them in order to proceed with their curriculum, which explains the course completion at ceiling levels. Therefore, we did not conduct any further analyses using course completion.
+
+We first examined the descriptives for course grade, across factors of interest followed by mixed effects hierarchical regression [@cohen2013applied] in order to estimate the impact of open textbook adoption on course grade. This analysis is generally conducted by comparing at least two models:
+
+- _base model_ that contains all relevant factors that might influence the outcome (course grade) except for the variable of interest (textbook type)          
+- _comparison model(s)_ that includes the variable of interest in addition to all factors in the base model. If the comparison model significantly outperforms the base model, then we may safely conclude that the treatment had a consequential impact on the outcome. For the purposed of our analysis, we constructed two comparison models, an additive model, and an interactive model which will be explained in the following section.        
+
+In the following section we outline the details for our models. For examining course grades, we conducted a linear mixed effect hierarchical regression, in which the outcome variable was course grade for each course that a single student received a grade for. The following _fixed effect_ predictor variables were included in the base model:
+
+- demographic variables such as whether the students were:
+  - pell eligible,          
+  - registered as a part-time student,         
+- prior performance measure, i.e., the cumulative undergraduate GPA           
+- course type, i.e., whether the course was delivered online  
+
+In addition to the above fixed effect variables, the following _random effect_ variables were also included in the model:
+
+- instructors nested under course subject accounting for instructor differences within each subject  
+- given that course related changes often occur in annual or semesterly cycles, we accounted for these temporal factors by including the following random effect variables,
+  - academic year (Fall to Summer constituting one academic year)         
+  - semester (Fall, Summer, Spring)                    
+
+In addition to the base model that included the above factors, we constructed 2 comparison models, an additive and an interactive model. The additive model included online textbook type as the variable of interest. In the interactive model, in addition to textbook type, we included a term that accounted for differential impact, if any, of online textbook type on students who were pell eligible. The findings of the model results are represented in `t tbls("grade mod",display = "cite")`.
+
+
+```{r grade mod, results='asis'}
+stargazer::stargazer(gradeM0, gradeM1, gradeM2, type = "latex",omit.stat = c("BIC","ll"), covariate.labels = c("Pell Eligible","Registration Status (Part-Time)","Cumulative Undergraduate GPA","Course Type (Online)","Textbook Type (Open) ", "Open Textbook x Pell Eligible"), dep.var.labels = "Course Grade Models", ci = TRUE, title = "Summaries for the base, additive, and interactive models, with course grade as the outcome measure.", dep.var.caption = "", digits = 2, column.labels = c("Base", "Additive", "Interactive"), model.numbers = FALSE, notes.align = "l", notes.label = "Note: 95\\% CI in parentheses")
+```
+
+From the results of the base model `t tbls("grade mod",display = "cite")`, we observe that pell eligibility, part-time registration status, and cumulative undergraduate GPA had a significant impact on course grade, while online courses did not have a significant impact. Pell eligible students were likely to perform slightly worse students who were not pell eligible, part-time students performed slightly better than full-time students, and students with higher cumulative GPA had higher course grades. These factors retained the same impact across all three models (base, additive, interactive). From the additive  and interactive models we found that textbook type has no significant effect on course grade. In addition, in the interactive model we found that there was no significant advantage of pell eligible students using open textbooks on course grades. 
+
+```{r mMasterPlot, fig.cap="Unadjusted and adjusted history course grade means for non-pell eligible and pell eligible students."}
+mMasterPlot
+```
+
+
+```{r effsizes}
+effS %>% 
+    kable(., format = "latex", linesep = "",caption = paste0("Effect size estimates (Cohen's d) showing non-significant group differences between students using traditional and open textbooks in History."), booktabs = TRUE,
+          col.names = c("","Cohen's d[note]", "95% Conf. Int."),
+          align = c("l", rep("r", 3))) %>%
+    kable_styling(full_width = FALSE) %>%
+    kableExtra::add_footnote(label = c("Standardized mean difference."),notation = "symbol") #95% confidence interval in brackets.
+```
+
+# Discussion
+
+Price of previous textbook was \$25 which was included in the tuition fees. After the adoption of the open textbook, price was reduced to \$5 already included in their fee. A textbook worth \$25 the cost of which was already included in the tuition ensured that students had access to the book already. Therefore, adopting an open textbook likely did not increase access to the textbook, which contributed so no statistically detectable difference in course grades of students using traditional textbook relative to students using an open textbook. 
