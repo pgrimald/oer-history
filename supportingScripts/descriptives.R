@@ -522,54 +522,54 @@ summary(passM0)
 #emmip(passM0, ~onlineInd)
 
 ### Additive treatment model
-passM1 <- SLCC_11_18_proc %>% 
-  lme4::glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
-          everPellEligibleInd +  firstGenerationInd + fullTime + 
-          cumUgGpa + onlineInd + `Textbook Type`, family = binomial, 
-        data=., control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
-                               optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
-
-summary(passM1)
-
-# Find the least squares mean
-passPmmeans <- emmeans(passM1, ~`Textbook Type`)
-# emmip(passM1, onlineInd ~ `Textbook Type`)
-
-# Anova
-passAnova <- anova(passM1)
-
-
-# Model comparison
-passComp <- anova(passM0, passM1)
+# passM1 <- SLCC_11_18_proc %>% 
+#   lme4::glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
+#           everPellEligibleInd +  firstGenerationInd + fullTime + 
+#           cumUgGpa + as.numeric(cpt1) + onlineInd + `Textbook Type`, family = binomial, 
+#         data=., control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
+#                                optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)))
+# 
+# summary(passM1)
+# 
+# # Find the least squares mean
+# passPmmeans <- emmeans(passM1, ~`Textbook Type`)
+# # emmip(passM1, onlineInd ~ `Textbook Type`)
+# 
+# # Anova
+# passAnova <- anova(passM1)
+# 
+# 
+# # Model comparison
+# passComp <- anova(passM0, passM1)
 
 # Plot random effects
 #passM1RE <- sjp.glmer(passM1, type = "re") + theme_minimal()
 
 ### Interactive treatment model
-passM2 <- SLCC_11_18_proc %>% 
-  lme4::glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
-        everPellEligibleInd + firstGenerationInd + fullTime +
-        cumUgGpa + onlineInd + `Textbook Type` + 
-          `Textbook Type`:everPellEligibleInd + `Textbook Type`:onlineInd, family = binomial, 
-        control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
-                               optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data=.)
-
-summary(passM2)
-
-# Anova
-passAnova2 <- anova(passM2)
-
-# passM2means <- emmeans(passM2, ~ `Textbook Type` * everPellEligibleInd)
-# emmip(passM2, everPellEligibleInd ~ `Textbook Type`)
-# Plot random effects
-# passM2RE <- sjp.glmer(passM2, type = "re") + theme_minimal()
-
-
-passAIC <- AIC(passM0, passM1, passM2)
-
-# Comparing additive and interactive models
-anova(passM1, passM2)
-
+# passM2 <- SLCC_11_18_proc %>% 
+#   lme4::glmer(pass ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
+#         everPellEligibleInd + firstGenerationInd + fullTime +
+#         cumUgGpa + onlineInd + `Textbook Type` + 
+#           `Textbook Type`:everPellEligibleInd + `Textbook Type`:onlineInd, family = binomial, 
+#         control = glmerControl(optimizer = "optimx", calc.derivs = FALSE,
+#                                optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE)), data=.)
+# 
+# summary(passM2)
+# 
+# # Anova
+# passAnova2 <- anova(passM2)
+# 
+# # passM2means <- emmeans(passM2, ~ `Textbook Type` * everPellEligibleInd)
+# # emmip(passM2, everPellEligibleInd ~ `Textbook Type`)
+# # Plot random effects
+# # passM2RE <- sjp.glmer(passM2, type = "re") + theme_minimal()
+# 
+# 
+# passAIC <- AIC(passM0, passM1, passM2)
+# 
+# # Comparing additive and interactive models
+# anova(passM1, passM2)
+# 
 
 ## Average Grade Models -----------------------------------------------
 # emm_options(pbkrtest.limit = 3000, lmerTest.limit = 3000)
@@ -579,7 +579,7 @@ anova(passM1, passM2)
 gradeM0 <- SLCC_11_18_proc %>% 
   lme4::lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
           everPellEligibleInd + fullTime + 
-          cumUgGpa + onlineInd, data=.)
+          cumUgGpa + cpt1 + onlineInd, data=.)
 #, control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
 # optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE))
 summary(gradeM0)
@@ -592,7 +592,7 @@ summary(gradeM0)
 gradeM1 <- SLCC_11_18_proc %>% 
   lme4::lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
          everPellEligibleInd + fullTime +
-         cumUgGpa + onlineInd + `Textbook Type`, data=.)
+         cumUgGpa + cpt1 + onlineInd + `Textbook Type`, data=.)
 # , control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
 #                         optCtrl = list(method = "nlminb", starttests = FALSE, kkt = FALSE))
 
@@ -626,7 +626,7 @@ gradeComp <- anova(gradeM0, gradeM1)
 gradeM2 <- SLCC_11_18_proc %>% 
   lme4::lmer(courseGrade ~ (1|courseSubject/instructorId) + (1|academicYear) + (1|semester) + 
          everPellEligibleInd + fullTime  + 
-         cumUgGpa + onlineInd + `Textbook Type` + 
+         cumUgGpa + cpt1 + onlineInd + `Textbook Type` + 
          `Textbook Type`:everPellEligibleInd, data=.)
 
         # control = lmerControl(optimizer = "optimx", calc.derivs = FALSE,
@@ -635,6 +635,8 @@ gradeM2 <- SLCC_11_18_proc %>%
 summary(gradeM2)
 
 
+# Model comparison
+gradeComp1 <- anova(gradeM0, gradeM2)
 
 
 # Anova
@@ -714,13 +716,13 @@ create.es.table <- function(es.table){
 cGrade.d <- cohen.d(history$courseGrade, history$`Textbook Type`, na.rm = TRUE)
 pell.d <- cohen.d(as.numeric(history$everPellEligibleInd), history$`Textbook Type`, na.rm = TRUE)
 cumUg.d <- cohen.d(history$cumUgGpa, history$`Textbook Type`, na.rm = TRUE)
+cpt1.d <- cohen.d(history$cpt1, history$`Textbook Type`, na.rm = TRUE)
 courseTyp.d <- cohen.d(as.numeric(history$onlineInd), history$`Textbook Type`, na.rm = TRUE)
 regStat.d <- cohen.d(as.numeric(as.factor(history$fullTime)), history$`Textbook Type`, na.rm = TRUE)
 
-effS <-bind_rows(theD(cGrade.d), theD(pell.d), theD(cumUg.d), theD(courseTyp.d), theD(regStat.d))
+effS <-bind_rows(theD(cGrade.d), theD(pell.d), theD(regStat.d), theD(cumUg.d), theD(cpt1.d),theD(courseTyp.d))
 effS <- data.frame(check.names = FALSE, 
-                   Factor = c("Course Grade", "Pell Eligibility", "Cumulative UG GPA", "Course Type", 
-                              "Registration Status"), effS)
+                   Factor = c("Course Grade", "Pell Eligibility","Registration Status", "Cumulative UG GPA", "Accuplacer Reading Comprehension","Course Type"), effS)
 ## Pass Rate Logistic Models -----------------------------------------------
 
 

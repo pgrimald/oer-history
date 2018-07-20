@@ -170,7 +170,8 @@ SLCC_11_18_proc <- SLCC_11_18_proc %>%
          everPellEligibleInd = factor(if_else(everPellEligibleInd == "Y", "Pell Eligible", 
                                               if_else(everPellEligibleInd == "N", "Non-Pell Eligible", "NA"))),
          firstGenerationIndNA = as.numeric(if_else(firstGenerationInd == "U", "NA", 
-                                                   if_else(firstGenerationInd == "Y", "1", "0"))))
+                                                   if_else(firstGenerationInd == "Y", "1", "0"))),
+         cpt1 = as.numeric(cpt1))
 
 
 # Plot to check oer and number of students
